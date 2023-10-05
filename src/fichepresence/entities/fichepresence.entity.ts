@@ -9,6 +9,12 @@ export class Fichepresence {
     @Prop({type: String, required: true})
     date: string;
 
+    @Prop({type: String, required: true})
+    mois: string;
+
+    @Prop({type: String, required: true})
+    annee: string;
+
     @Prop({type: Boolean, required: true, default: true})
     isOpen: boolean;
 

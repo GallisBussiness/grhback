@@ -58,7 +58,7 @@ export class Employe {
     @Prop({type:String, required: true})
     lieu_de_naissance: string;
 
-    @Prop({type:String, required: true})
+    @Prop({type:String})
     profile: string;
 
     @Prop({type:Number, required: true})

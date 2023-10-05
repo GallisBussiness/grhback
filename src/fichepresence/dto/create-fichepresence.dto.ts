@@ -5,6 +5,12 @@ export class CreateFichepresenceDto {
     @IsString()
     date: Date;
 
+    @IsString()
+    mois: string;
+
+    @IsString()
+    annee: string;
+
     @IsOptional()
     @IsBoolean()
     isOpen: boolean;
