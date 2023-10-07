@@ -2,19 +2,26 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { FichepresenceService } from './fichepresence.service';
 import { CreateFichepresenceDto } from './dto/create-fichepresence.dto';
 import { UpdateFichepresenceDto } from './dto/update-fichepresence.dto';
+import { PresenceService } from 'src/presence/presence.service';
+import { MonthDto } from './dto/month.dto';
 
 @Controller('fichepresence')
 export class FichepresenceController {
-  constructor(private readonly fichepresenceService: FichepresenceService) {}
+  constructor(private readonly fichepresenceService: FichepresenceService,private readonly presenceService: PresenceService) {}
 
   @Post()
   create(@Body() createFichepresenceDto: CreateFichepresenceDto) {
     return this.fichepresenceService.create(createFichepresenceDto);
   }
 
+  @Post("getbymonth")
+  getFicheByMonth(@Body() monthDto: MonthDto) {
+    return this.fichepresenceService.getByMonth(monthDto);
+  }
+
   @Get()
   findAll() {
-    return this.fichepresenceService.findAll();
+    return this.fichepresenceService.findAll();    
   }
 
   @Get("/opened")

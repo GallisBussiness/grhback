@@ -6,7 +6,10 @@ export type FichepresenceDocument = Fichepresence & Document;
 
 @Schema({timestamps: true})
 export class Fichepresence {
-    @Prop({type: String, required: true})
+
+    _id: string;
+
+    @Prop({type: String, required: true,unique: true})
     date: string;
 
     @Prop({type: String, required: true})

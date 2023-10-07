@@ -12,5 +12,6 @@ import { Presence, PresenceSchema } from './entities/presence.entity';
   }}])],
   controllers: [PresenceController],
   providers: [PresenceService],
+  exports:[PresenceService]
 })
 export class PresenceModule {}
