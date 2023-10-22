@@ -54,8 +54,8 @@ export class CreateEmployeDto {
     @IsString()
     profile: string;
 
-    @IsNumber()
-    categorie: number;
+    @IsMongoId()
+    categorie: string;
 
     @IsNumber()
     is_actif: number;

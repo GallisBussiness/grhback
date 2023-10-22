@@ -3,7 +3,7 @@ import { EmployeService } from './employe.service';
 import { CreateEmployeDto } from './dto/create-employe.dto';
 import { UpdateEmployeDto } from './dto/update-employe.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { unlinkSync } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
 
 @Controller('employe')
 export class EmployeController {
@@ -50,7 +50,7 @@ export class EmployeController {
     if(profile){
       updateEmployeDto.profile  = profile.filename;
       const em = await this.employeService.update(id,updateEmployeDto);
-      if(em && em.profile){
+      if(em && existsSync("uploads/profiles/" + em.profile)){
         unlinkSync("uploads/profiles/" + em.profile);
       }
       return em;

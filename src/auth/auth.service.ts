@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
+import { unset } from "lodash";
 
 @Injectable()
 export class AuthService {
@@ -16,15 +17,17 @@ export class AuthService {
     const user = await this.userService.findByUsername(username);
     if (user !== null) {
       const isMatch = await bcrypt.compare(pass, user.password);
-      if (isMatch) return user;
+      if (isMatch) {
+        unset(user,'password');
+        return user;
+      }
     }
     return null;
   }
 
   login(user) {
     const payload = {
-      tel: user?.tel,
-      name: user?.prenom,
+      prenom: user?.prenom,
       role: user?.role,
       _id: user?._id,
       sub: user?._id,

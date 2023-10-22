@@ -18,6 +18,12 @@ export class User {
   @Prop({ type: String, required: true })
   password: string;
 
+  @Prop({ type: String, required: true })
+  prenom: string;
+
+  @Prop({ type: String, required: true })
+  nom: string;
+
   @Prop({ type: String })
   resetPasswordToken: string;
 

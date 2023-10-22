@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Type } from "class-transformer";
 import { Document, Types } from "mongoose";
+import { Categorie } from "src/categorie/entities/categorie.entity";
 import { v4 as uuidv4 } from 'uuid';
 
 export type EmployeDocument = Employe & Document;
@@ -13,7 +15,7 @@ export class Employe {
     @Prop({type:String, required: true})
     nom: string;
 
-    @Prop({type: String, default: uuidv4()})
+    @Prop({type: String, default: uuidv4})
     code: string;
 
     @Prop({type:String, required: true})
@@ -61,8 +63,8 @@ export class Employe {
     @Prop({type:String})
     profile: string;
 
-    @Prop({type:Number, required: true})
-    categorie: number;
+    @Prop({type:Types.ObjectId, required: true,ref: Categorie.name})
+    categorie: string;
 
     @Prop({type:Number, required: true, default: 1})
     is_actif: number;

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { ForbiddenException, HttpException, Injectable, NestMiddleware } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NextFunction, Request, Response } from 'express';
 import { User } from 'src/user/entities/user.entity';
@@ -12,8 +12,8 @@ export class AuthMiddleware implements NestMiddleware {
       const token = req.headers.authorization.split(' ')[1];
       try {
         const decoded = this.jwtService.verify(token) as User;
-        const { login, role, _id } = decoded;
-        req.user = { login,role, _id };
+        const { prenom, role, _id } = decoded;
+        req.user = { prenom,role, _id };
       } catch (error) {
         throw new HttpException("Authentication failed", 440);
       }
