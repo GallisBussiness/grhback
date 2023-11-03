@@ -12,7 +12,7 @@ libelle:string;
 @Prop({type: String,required: true})
 code:string;
 
-@Prop({type: Types.ObjectId, required: true,ref: Section.name})
+@Prop({type: Types.ObjectId, required: true,ref: Section.name, autopopulate: true})
 section: string;
 }
 export const RubriqueSchema = SchemaFactory.createForClass(Rubrique);

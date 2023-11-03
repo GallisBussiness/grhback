@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateNominationDto } from './dto/create-nomination.dto';
 import { UpdateNominationDto } from './dto/update-nomination.dto';
 import { AbstractModel } from 'src/utils/abstractmodel';
@@ -10,5 +10,13 @@ import { Model } from 'mongoose';
 export class NominationService extends AbstractModel<Nomination,CreateNominationDto,UpdateNominationDto>{
   constructor(@InjectModel(Nomination.name) private readonly nominationModel: Model<NominationDocument>){
     super(nominationModel);
+  }
+
+  async findOneByEmploye(emp: string):Promise<Nomination[]> {
+    try {
+      return this.nominationModel.find({employe: emp});
+    } catch (error) {
+      throw new HttpException(error.message,500)
+    }
   }
 }

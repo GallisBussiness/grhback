@@ -5,7 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Nomination, NominationSchema } from './entities/nomination.entity';
 
 @Module({
-  imports:[MongooseModule.forFeature([{name:Nomination.name,schema: NominationSchema}])],
+  imports:[MongooseModule.forFeatureAsync([{name:Nomination.name, useFactory: () => {
+    const schema = NominationSchema;
+    schema.plugin(require('mongoose-autopopulate'));
+    return schema;
+  }}])],
   controllers: [NominationController],
   providers: [NominationService],
 })

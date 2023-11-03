@@ -19,16 +19,16 @@ export class RubriqueController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.rubriqueService.findOne(+id);
+    return this.rubriqueService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRubriqueDto: UpdateRubriqueDto) {
-    return this.rubriqueService.update(+id, updateRubriqueDto);
+    return this.rubriqueService.update(id, updateRubriqueDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.rubriqueService.remove(+id);
+    return this.rubriqueService.remove(id);
   }
 }

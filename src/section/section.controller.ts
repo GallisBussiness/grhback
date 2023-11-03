@@ -7,10 +7,10 @@ import { UpdateSectionDto } from './dto/update-section.dto';
 export class SectionController {
   constructor(private readonly sectionService: SectionService) {}
 
-  @Post()
-  create(@Body() createSectionDto: CreateSectionDto) {
-    return this.sectionService.create(createSectionDto);
-  }
+  // @Post()
+  // create(@Body() createSectionDto: CreateSectionDto) {
+  //   return this.sectionService.create(createSectionDto);
+  // }
 
   @Get()
   findAll() {
@@ -22,13 +22,13 @@ export class SectionController {
     return this.sectionService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSectionDto: UpdateSectionDto) {
-    return this.sectionService.update(id, updateSectionDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateSectionDto: UpdateSectionDto) {
+  //   return this.sectionService.update(id, updateSectionDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sectionService.remove(id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.sectionService.remove(id);
+  // }
 }

@@ -5,7 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Service, ServiceSchema } from './entities/service.entity';
 
 @Module({
-  imports:[MongooseModule.forFeature([{name: Service.name, schema: ServiceSchema}])],
+  imports:[MongooseModule.forFeatureAsync([{name: Service.name,useFactory: () => {
+    const schema =  ServiceSchema;
+    schema.plugin(require('mongoose-autopopulate'));
+    return schema;
+  }}])],
   controllers: [ServiceController],
   providers: [ServiceService],
 })

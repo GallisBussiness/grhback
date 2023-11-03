@@ -9,7 +9,7 @@ export class Service {
  @Prop({type: String, required: true})
  nom: string;
 
- @Prop({type: Types.ObjectId,ref: Division.name,required: true})
+ @Prop({type: Types.ObjectId,ref: Division.name,required: true,autopopulate: true})
  division: string;
 }
 

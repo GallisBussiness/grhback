@@ -8,7 +8,7 @@ export class AttributionIndividuelle {
     @Prop({type: Types.ObjectId,ref: Employe.name,required: true})
     employe: string;
 
-    @Prop({type: Types.ObjectId,ref: Rubrique.name,required: true})
+    @Prop({type: Types.ObjectId,ref: Rubrique.name,required: true,autopopulate: true})
     rubrique: string;
 
     @Prop({type:Number,required: true,default:0})

@@ -24,6 +24,7 @@ import { AttributionFonctionnelleModule } from './attribution-fonctionnelle/attr
 import { AttributionGlobaleModule } from './attribution-globale/attribution-globale.module';
 import { AttributionIndividuelleModule } from './attribution-individuelle/attribution-individuelle.module';
 import { ExclusionSpecifiqueModule } from './exclusion-specifique/exclusion-specifique.module';
+import { LotModule } from './lot/lot.module';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import { ExclusionSpecifiqueModule } from './exclusion-specifique/exclusion-spec
       },
       inject: [ConfigService],
     }),
-    EmployeModule, PresenceModule, FichepresenceModule,UserModule, SessionModule, RubriqueModule, SectionModule, CategorieModule, ImpotModule, DivisionModule, ServiceModule, FonctionModule, TypedocumentModule, DocumentModule, NominationModule, AttributionFonctionnelleModule, AttributionGlobaleModule, AttributionIndividuelleModule, ExclusionSpecifiqueModule],
+    EmployeModule, PresenceModule, FichepresenceModule,UserModule, SessionModule, RubriqueModule, SectionModule, CategorieModule, DivisionModule, ServiceModule, FonctionModule, TypedocumentModule, DocumentModule, NominationModule, AttributionFonctionnelleModule, AttributionGlobaleModule, AttributionIndividuelleModule, ExclusionSpecifiqueModule, LotModule],
   controllers: [AppController],
   providers: [AppService],
 })

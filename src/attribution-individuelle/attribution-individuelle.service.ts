@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateAttributionIndividuelleDto } from './dto/create-attribution-individuelle.dto';
 import { UpdateAttributionIndividuelleDto } from './dto/update-attribution-individuelle.dto';
 import { AbstractModel } from 'src/utils/abstractmodel';
@@ -11,5 +11,13 @@ import { AttributionFonctionnelleDocument } from 'src/attribution-fonctionnelle/
 export class AttributionIndividuelleService extends AbstractModel<AttributionIndividuelle,CreateAttributionIndividuelleDto,UpdateAttributionIndividuelleDto>{
   constructor(@InjectModel(AttributionIndividuelle.name) private readonly attributionIndividuelleModel: Model<AttributionFonctionnelleDocument>){
     super(attributionIndividuelleModel);
+  }
+
+  async findOneByEmploye(emp: string):Promise<AttributionIndividuelle[]> {
+    try {
+      return this.attributionIndividuelleModel.find({employe: emp});
+    } catch (error) {
+      throw new HttpException(error.message,500)
+    }
   }
 }

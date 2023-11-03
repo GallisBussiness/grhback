@@ -5,7 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AttributionIndividuelle, AttributionIndividuelleSchema } from './entities/attribution-individuelle.entity';
 
 @Module({
-  imports:[MongooseModule.forFeature([{name: AttributionIndividuelle.name,schema: AttributionIndividuelleSchema}])],
+  imports:[MongooseModule.forFeatureAsync([{name: AttributionIndividuelle.name,useFactory:() => {
+    const schema = AttributionIndividuelleSchema;
+    schema.plugin(require('mongoose-autopopulate'));
+    return schema;
+  }}])],
   controllers: [AttributionIndividuelleController],
   providers: [AttributionIndividuelleService],
 })

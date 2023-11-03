@@ -5,7 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ExclusionSpecifique, ExclusionSpecifiqueSchema } from './entities/exclusion-specifique.entity';
 
 @Module({
-  imports:[MongooseModule.forFeature([{name: ExclusionSpecifique.name,schema: ExclusionSpecifiqueSchema}])],
+  imports:[MongooseModule.forFeatureAsync([{name: ExclusionSpecifique.name,useFactory:() =>{
+    const schema =  ExclusionSpecifiqueSchema;
+    schema.plugin(require('mongoose-autopopulate'));
+    return schema;
+  }}])],
   controllers: [ExclusionSpecifiqueController],
   providers: [ExclusionSpecifiqueService],
 })

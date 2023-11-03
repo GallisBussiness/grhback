@@ -5,7 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Division, DivisionSchema } from './entities/division.entity';
 
 @Module({
-  imports:[MongooseModule.forFeature([{name: Division.name,schema: DivisionSchema}])],
+  imports:[MongooseModule.forFeatureAsync([{name: Division.name,useFactory: () => {
+   const schema =  DivisionSchema;
+   schema.plugin(require('mongoose-autopopulate'));
+   return schema;
+  }}])],
   controllers: [DivisionController],
   providers: [DivisionService],
 })

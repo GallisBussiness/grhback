@@ -8,7 +8,7 @@ export class Division {
     @Prop({type: String, required: true})
     nom: string;
 
-    @Prop({type: Types.ObjectId,ref: Division.name})
+    @Prop({type: Types.ObjectId,ref: Division.name,autopopulate: true})
     parent: string;
 }
 

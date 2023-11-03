@@ -12,6 +12,12 @@ export class ServiceController {
     return this.serviceService.create(createServiceDto);
   }
 
+  @Get('/bydivision/:id')
+  findByDivision(@Param('id') id: string) {
+    return this.serviceService.findByDivision(id);
+  }
+
+
   @Get()
   findAll() {
     return this.serviceService.findAll();

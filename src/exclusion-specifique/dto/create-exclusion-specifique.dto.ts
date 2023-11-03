@@ -9,5 +9,4 @@ export class CreateExclusionSpecifiqueDto {
 
     @IsString()
     description: string;
-
 }

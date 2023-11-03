@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
-import { Fonction } from "src/fonction/entities/fonction.entity";
 import { Rubrique } from "src/rubrique/entities/rubrique.entity";
 
 export type AttributionGlobaleDocument = HydratedDocument<AttributionGlobale>;
@@ -8,7 +7,7 @@ export type AttributionGlobaleDocument = HydratedDocument<AttributionGlobale>;
 @Schema({timestamps: true})
 export class AttributionGlobale {
    
-    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true})
+    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true, autopopulate: true})
     rubrique: string;
 
     @Prop({type: Number, required: true, default: 0})

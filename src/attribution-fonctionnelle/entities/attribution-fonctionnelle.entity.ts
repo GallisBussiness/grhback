@@ -7,10 +7,10 @@ export type AttributionFonctionnelleDocument = HydratedDocument<AttributionFonct
 
 @Schema({timestamps: true})
 export class AttributionFonctionnelle {
-    @Prop({type: Types.ObjectId,ref: Fonction.name, required: true})
+    @Prop({type: Types.ObjectId,ref: Fonction.name, required: true, autopopulate:true})
     fonction: string;
 
-    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true})
+    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true, autopopulate:true})
     rubrique: string;
 
     @Prop({type: Number, required: true, default: 0})

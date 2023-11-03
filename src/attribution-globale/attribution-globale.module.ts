@@ -5,7 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AttributionGlobale, AttributionGlobaleSchema } from './entities/attribution-globale.entity';
 
 @Module({
-  imports: [MongooseModule.forFeature([{name: AttributionGlobale.name,schema: AttributionGlobaleSchema}])],
+  imports: [MongooseModule.forFeatureAsync([{name: AttributionGlobale.name, useFactory:() =>{
+   const  schema = AttributionGlobaleSchema;
+   schema.plugin(require('mongoose-autopopulate'));
+   return schema;
+  }}])],
   controllers: [AttributionGlobaleController],
   providers: [AttributionGlobaleService],
 })
