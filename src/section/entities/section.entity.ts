@@ -12,3 +12,9 @@ export class Section {
 }
 
 export const SectionSchema = SchemaFactory.createForClass(Section);
+
+export enum SECTIONNAME {
+    RETENUE = 'RETENUE',
+    IMPOSABLE = 'IMPOSABLE',
+    NONIMPOSABLE = 'NON-IMPOSABLE'
+}

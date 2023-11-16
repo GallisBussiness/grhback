@@ -18,8 +18,8 @@ export class ExclusionSpecifiqueController {
   }
 
   @Get('byemploye/:emp')
-  findOneByEmploye(@Param('emp') emp: string) {
-    return this.exclusionSpecifiqueService.findOneByEmploye(emp);
+  findByEmploye(@Param('emp') emp: string) {
+    return this.exclusionSpecifiqueService.findByEmploye(emp);
   }
 
   @Get(':id')

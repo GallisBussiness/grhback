@@ -13,7 +13,7 @@ export class AttributionIndividuelleService extends AbstractModel<AttributionInd
     super(attributionIndividuelleModel);
   }
 
-  async findOneByEmploye(emp: string):Promise<AttributionIndividuelle[]> {
+  async findByEmploye(emp: string):Promise<AttributionIndividuelle[]> {
     try {
       return this.attributionIndividuelleModel.find({employe: emp});
     } catch (error) {

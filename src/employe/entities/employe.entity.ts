@@ -8,7 +8,10 @@ export type EmployeDocument = Employe & Document;
 
 @Schema({timestamps: true})
 export class Employe {
-   
+    
+
+    _id:string;
+
     @Prop({type:String, required: true})
     prenom: string;
 
@@ -63,8 +66,9 @@ export class Employe {
     @Prop({type:String})
     profile: string;
 
-    @Prop({type:Types.ObjectId, required: true,ref: Categorie.name})
-    categorie: string;
+    @Prop({type:Types.ObjectId, required: true,ref: Categorie.name,autopopulate: true})
+    @Type(() => Categorie)
+    categorie: Categorie;
 
     @Prop({type:Number, required: true, default: 1})
     is_actif: number;

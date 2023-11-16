@@ -11,4 +11,5 @@ export class LotService extends AbstractModel<Lot,CreateLotDto,UpdateLotDto>{
   constructor(@InjectModel(Lot.name) private readonly lotModel: Model<LotDocument>){
     super(lotModel);
   }
+
 }

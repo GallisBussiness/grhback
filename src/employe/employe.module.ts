@@ -21,12 +21,17 @@ const storage = diskStorage({
 
 @Module({
   imports:[
-    MongooseModule.forFeature([{name: Employe.name,schema: EmployeSchema}]),
+    MongooseModule.forFeatureAsync([{name: Employe.name,useFactory: () => {
+      const schema = EmployeSchema;
+      schema.plugin(require('mongoose-autopopulate'));
+      return schema;
+    }}]),
     MulterModule.register({
       storage
     })
   ],
   controllers: [EmployeController],
   providers: [EmployeService],
+  exports:[EmployeService]
 })
 export class EmployeModule {}

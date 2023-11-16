@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Type } from "class-transformer";
 import { HydratedDocument, Types } from "mongoose";
 import { Division } from "src/division/entities/division.entity";
 import { Employe } from "src/employe/entities/employe.entity";
@@ -22,13 +23,16 @@ export class Nomination {
     employe: string;
 
     @Prop({type: Types.ObjectId,ref: Fonction.name, required: true, autopopulate: true})
-    fonction: Types.ObjectId;
+    @Type(()=> Fonction)
+    fonction: Fonction;
 
     @Prop({type: Types.ObjectId,ref: Division.name, required: true, autopopulate: true})
-    division: Types.ObjectId;
+    @Type(() => Division)
+    division: Division;
 
     @Prop({type: Types.ObjectId,ref:Service.name, autopopulate: true})
-    service: Types.ObjectId;
+    @Type(() => Service)
+    service: Service;
 }
 
 export const NominationSchema = SchemaFactory.createForClass(Nomination);

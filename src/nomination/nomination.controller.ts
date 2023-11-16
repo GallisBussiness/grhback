@@ -18,8 +18,13 @@ export class NominationController {
   }
 
   @Get('byemploye/:emp')
-  findOneByEmploye(@Param('emp') emp: string) {
-    return this.nominationService.findOneByEmploye(emp);
+  findByEmploye(@Param('emp') emp: string) {
+    return this.nominationService.findByEmploye(emp);
+  }
+
+  @Get('byemploye/:emp')
+  findActiveByEmploye(@Param('emp') emp: string) {
+    return this.nominationService.findActiveByEmploye(emp);
   }
 
   @Get(':id')

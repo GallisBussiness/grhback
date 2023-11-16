@@ -25,6 +25,7 @@ import { AttributionGlobaleModule } from './attribution-globale/attribution-glob
 import { AttributionIndividuelleModule } from './attribution-individuelle/attribution-individuelle.module';
 import { ExclusionSpecifiqueModule } from './exclusion-specifique/exclusion-specifique.module';
 import { LotModule } from './lot/lot.module';
+import { BulletinModule } from './bulletin/bulletin.module';
 
 @Module({
   imports: [
@@ -48,7 +49,14 @@ import { LotModule } from './lot/lot.module';
       },
       inject: [ConfigService],
     }),
-    EmployeModule, PresenceModule, FichepresenceModule,UserModule, SessionModule, RubriqueModule, SectionModule, CategorieModule, DivisionModule, ServiceModule, FonctionModule, TypedocumentModule, DocumentModule, NominationModule, AttributionFonctionnelleModule, AttributionGlobaleModule, AttributionIndividuelleModule, ExclusionSpecifiqueModule, LotModule],
+    EmployeModule, PresenceModule, FichepresenceModule,UserModule,
+     SessionModule, RubriqueModule, SectionModule, 
+     CategorieModule, DivisionModule, ServiceModule, 
+     FonctionModule, TypedocumentModule, DocumentModule, 
+     NominationModule, AttributionFonctionnelleModule,
+      AttributionGlobaleModule, AttributionIndividuelleModule,
+       ExclusionSpecifiqueModule, LotModule, BulletinModule,
+      ],
   controllers: [AppController],
   providers: [AppService],
 })

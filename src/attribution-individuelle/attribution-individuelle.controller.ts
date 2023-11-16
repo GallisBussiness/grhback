@@ -19,7 +19,7 @@ export class AttributionIndividuelleController {
 
   @Get('byemploye/:emp')
   findOneByEmploye(@Param('emp') emp: string) {
-    return this.attributionIndividuelleService.findOneByEmploye(emp);
+    return this.attributionIndividuelleService.findByEmploye(emp);
   }
 
   @Get(':id')

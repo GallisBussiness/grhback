@@ -12,5 +12,6 @@ import { AttributionIndividuelle, AttributionIndividuelleSchema } from './entiti
   }}])],
   controllers: [AttributionIndividuelleController],
   providers: [AttributionIndividuelleService],
+  exports: [AttributionIndividuelleService]
 })
 export class AttributionIndividuelleModule {}

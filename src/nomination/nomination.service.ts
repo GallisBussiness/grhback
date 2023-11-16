@@ -12,9 +12,17 @@ export class NominationService extends AbstractModel<Nomination,CreateNomination
     super(nominationModel);
   }
 
-  async findOneByEmploye(emp: string):Promise<Nomination[]> {
+  async findByEmploye(emp: string):Promise<Nomination[]> {
     try {
       return this.nominationModel.find({employe: emp});
+    } catch (error) {
+      throw new HttpException(error.message,500)
+    }
+  }
+
+  async findActiveByEmploye(emp: string):Promise<Nomination[]> {
+    try {
+      return this.nominationModel.find({employe: emp,est_active: true});
     } catch (error) {
       throw new HttpException(error.message,500)
     }

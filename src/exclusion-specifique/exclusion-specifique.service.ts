@@ -12,7 +12,7 @@ export class ExclusionSpecifiqueService extends AbstractModel<ExclusionSpecifiqu
     super(exclusionSpecifiqueModel);
   }
 
-  async findOneByEmploye(emp: string):Promise<ExclusionSpecifique[]> {
+  async findByEmploye(emp: string):Promise<ExclusionSpecifique[]> {
     try {
       return this.exclusionSpecifiqueModel.find({employe: emp});
     } catch (error) {

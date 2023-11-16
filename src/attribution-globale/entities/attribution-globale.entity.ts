@@ -6,9 +6,11 @@ export type AttributionGlobaleDocument = HydratedDocument<AttributionGlobale>;
 
 @Schema({timestamps: true})
 export class AttributionGlobale {
-   
-    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true, autopopulate: true})
-    rubrique: string;
+    
+    _id: string;
+
+    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true, autopopulate: true,unique: true})
+    rubrique: Rubrique;
 
     @Prop({type: Number, required: true, default: 0})
     valeur_par_defaut: number;

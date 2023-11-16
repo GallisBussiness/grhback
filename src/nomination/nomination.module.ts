@@ -12,5 +12,6 @@ import { Nomination, NominationSchema } from './entities/nomination.entity';
   }}])],
   controllers: [NominationController],
   providers: [NominationService],
+  exports:[NominationService]
 })
 export class NominationModule {}

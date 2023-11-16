@@ -12,5 +12,6 @@ import { AttributionGlobale, AttributionGlobaleSchema } from './entities/attribu
   }}])],
   controllers: [AttributionGlobaleController],
   providers: [AttributionGlobaleService],
+  exports:[AttributionGlobaleService]
 })
 export class AttributionGlobaleModule {}

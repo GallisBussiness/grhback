@@ -12,5 +12,6 @@ import { AttributionFonctionnelle, AttributionFonctionnelleSchema } from './enti
   }}])],
   controllers: [AttributionFonctionnelleController],
   providers: [AttributionFonctionnelleService],
+  exports:[AttributionFonctionnelleService]
 })
 export class AttributionFonctionnelleModule {}

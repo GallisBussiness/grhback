@@ -8,5 +8,6 @@ import { Impot, ImpotSchema } from './entities/impot.entity';
   imports:[MongooseModule.forFeature([{name: Impot.name,schema: ImpotSchema}])],
   controllers: [ImpotController],
   providers: [ImpotService],
+  exports:[ImpotService]
 })
 export class ImpotModule {}

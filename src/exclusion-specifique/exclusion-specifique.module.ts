@@ -12,5 +12,6 @@ import { ExclusionSpecifique, ExclusionSpecifiqueSchema } from './entities/exclu
   }}])],
   controllers: [ExclusionSpecifiqueController],
   providers: [ExclusionSpecifiqueService],
+  exports:[ExclusionSpecifiqueService]
 })
 export class ExclusionSpecifiqueModule {}

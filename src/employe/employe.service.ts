@@ -20,6 +20,14 @@ export class EmployeService extends AbstractModel<Employe,CreateEmployeDto,Updat
   }
  }
 
+ async findActive():Promise<Employe[]> {
+  try {
+    return await this.employeModel.find({is_actif: true})
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
  async findByMat(mat: string):Promise<Employe> {
   try {
     return await this.employeModel.findOne({nci: mat})

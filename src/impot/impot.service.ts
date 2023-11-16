@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateImpotDto } from './dto/create-impot.dto';
 import { UpdateImpotDto } from './dto/update-impot.dto';
 import { AbstractModel } from 'src/utils/abstractmodel';
@@ -11,4 +11,19 @@ export class ImpotService extends AbstractModel<Impot,CreateImpotDto,UpdateImpot
   constructor(@InjectModel(Impot.name) private readonly impotModel: Model<ImpotDocument>){
     super(impotModel);
   }
+
+  async findOneByVal(val: number): Promise<Impot> {
+      try {
+        let v =  val % 1000;
+            if(v !== 0) {
+              v = Math.floor(val / 1000) * 1000; 
+              return this.impotModel.findOne({vals:v})
+            }else{
+              return this.impotModel.findOne({vals:val})
+            }
+      } catch (error) {
+        throw new HttpException(error.message,500);
+      }
+  }
+
 }
