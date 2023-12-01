@@ -11,7 +11,6 @@ import { AttributionFonctionnelleService } from 'src/attribution-fonctionnelle/a
 import { ExclusionSpecifiqueService } from 'src/exclusion-specifique/exclusion-specifique.service';
 import { differenceBy, round } from 'lodash';
 import { AttributionGlobale } from 'src/attribution-globale/entities/attribution-globale.entity';
-import { AttributionFonctionnelle } from 'src/attribution-fonctionnelle/entities/attribution-fonctionnelle.entity';
 import { SECTIONNAME } from 'src/section/entities/section.entity';
 import { Employe } from 'src/employe/entities/employe.entity';
 import { intervalToDuration, parse } from 'date-fns';
@@ -21,6 +20,8 @@ import { AttributionIndividuelle } from 'src/attribution-individuelle/entities/a
 import { NominationService } from 'src/nomination/nomination.service';
 import { Nomination } from 'src/nomination/entities/nomination.entity';
 import { ImpotService } from 'src/impot/impot.service';
+import { PdfMaker } from './helpers/pdf.maker';
+// import { PdfMaker } from './helpers/pdf.maker';
 
 @Controller('lot')
 export class LotController {
@@ -37,76 +38,84 @@ export class LotController {
 
   @Post()
   create(@Body() createLotDto: CreateLotDto) {
-    return this.lotService.create(createLotDto);
+    return this.lotService.createLot(createLotDto);
   }
 
   @Post('generatebulletin/:id')
   async generateBulletin(@Param('id') id: string) {
+    const pdf = new PdfMaker();
+    const lot = await this.lotService.findOne(id);
     const employes = await this.employeService.findActive();
     const attG = await this.attributionGlobaleService.findAll();
     const bulletins: Bulletin[] =[];
     for (let emp of employes){
-       let bulletin:Bulletin = {employe: emp._id,lignes:{gains:[],retenues:[]},lot:id};
+       let bulletin:Bulletin = {employe: emp,lignes:{gains:[],retenues:[]},lot};
        let brut = 0;
        let ipres = 0;
        const {brut:b,ipres:i} = await this.determinationGains(emp,bulletin,brut,ipres,attG);
        await this.determinationRetenues(emp,bulletin,b,i,attG);
        bulletins.push(bulletin);
+       try {
+        pdf.make(bulletin)
+      } catch (error) {
+        throw new Error(error)
+      }
   }
-   
+  // pdf.makeAll(bulletins);
   return bulletins;
 }
 
   async determinationGains(emp: Employe,bulletin: Bulletin,brut: number,ipres: number,attG:AttributionGlobale[]){
     const idemp = emp._id.toString();
-    const exclSpec = await this.exclusionSpecifiqueService.findByEmploye(idemp);
-    const attrInd = await this.attributionIndividuelleService.findByEmploye(idemp);
-    const nomActive  = await this.nominationService.findActiveByEmploye(idemp);
-    
+    const [exclSpec,attrInd,nomActive] = await Promise.all(
+      [this.exclusionSpecifiqueService.findByEmploye(idemp),
+      this.attributionIndividuelleService.findByEmploye(idemp),
+      this.nominationService.findActiveByEmploye(idemp)
+    ])
+   
    const {brut:b,ipres:i} =  await this.attributionGlobales(emp,bulletin,brut,ipres,attG,exclSpec);
     const br = await this.attributionFonctionnelle(nomActive,b,bulletin,exclSpec);
-    const {brut: brr,ipres:ii} = await this.attributionIndividuelle(emp,bulletin,br,ipres,attrInd)
+    const {brut: brr,ipres:ii} = await this.attributionIndividuelle(emp,bulletin,br,i,attrInd)
   return {brut:brr,ipres:ii};
   }
 
   async determinationRetenues(emp:Employe,bulletin: Bulletin,brut: number,ipres: number,attG:AttributionGlobale[]){
+    const bi = brut + ipres;
     const exclSpec = await this.exclusionSpecifiqueService.findByEmploye(emp._id);
     const retenues = differenceBy(attG,exclSpec,(v) => v.rubrique._id.toString()).filter(v => v.rubrique.section.nom === SECTIONNAME.RETENUE);
-    const m = await this.findImpot(brut,emp.nombre_de_parts);
-    const t = await this.findTrimf(brut);
+    const [m,t] = await Promise.all([
+      this.findImpot(brut,emp.nombre_de_parts),
+      this.findTrimf(brut)
+    ])
     retenues.forEach((r) => {
       const f = new this.figModel();
       // DETERMINATION IMPOT
       if(r.rubrique.code === 1080){
         f.base = brut;
         f.montant = m;
-        f.taux1 = (f.montant / (brut === 0 ? 1 : 0)) * 100;
+        f.taux1 = round((f.montant / (brut === 0 ? 1 : brut)) * 100,2);
         f.taux2 = 0;
       }
        //DETERMINATION DU TRIMF
        else if(r.rubrique.code === 1999){
         f.base = brut;
         f.montant = t;
-        f.taux1 = (f.montant / (brut === 0 ? 1 : 0)) * 100;
+        f.taux1 = round((f.montant / (brut === 0 ? 1 : brut)) * 100,2);
         f.taux2 = 0;
        }
       // DETERMINAtION DE IPRESS REGIME GENERALE
       else if(r.rubrique.code === 1000){
-        ipres += brut;
-        f.base = ipres >= 432000 ? 432000 : ipres;
+        f.base = bi >= 432000 ? 432000 : bi;
         f.taux1 = 5.60;
         f.montant = round(f.base * f.taux1 / 100);
         f.taux2 = 8.40;
       }
       //DETEMINATION DE L'IPRES REGIME COMPLEMENTAIRE CADRE
-      else if(r.rubrique.code === 1010){
-        const n = parseInt(emp.categorie.code.toString()[0],10);
-        if(n === 4){
-         f.base = ipres >= 1296000 ? 1296000 : ipres;
+      else if((r.rubrique.code === 1010) && (parseInt(emp.categorie.code.toString()[0],10) === 4)){
+         f.base = bi >= 1296000 ? 1296000 : bi;
          f.taux1 = 2.40;
          f.montant = round(f.base * f.taux1 / 100);
          f.taux2 = 3.60;
-        }
       }
       // DETERMINATION DE LA CAISSE DE SECURITE SOCIALE
       // Accident du travail
@@ -129,7 +138,15 @@ export class LotController {
         f.taux1 = 100;
       }
       f.rubrique = r.rubrique;
-      bulletin.lignes['retenues'].push(f);
+      if(r.rubrique.code === 1010){
+          if(parseInt(emp.categorie.code.toString()[0],10) === 4){
+            bulletin.lignes['retenues'].push(f);
+          }
+      }
+      else {
+        bulletin.lignes['retenues'].push(f);
+      }
+      
     })
     // RETENUES INDIVIDUELLES
 
@@ -185,6 +202,7 @@ export class LotController {
         else {
           f.montant = 26015;
         }
+        ipres += f.montant;
       }
       // DETERMINATION AUGMENTATION SOLDE 2000
       else if(a.rubrique.code === 1453){

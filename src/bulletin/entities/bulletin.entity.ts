@@ -8,10 +8,10 @@ export type BulletinDocument = HydratedDocument<Bulletin>
 @Schema({timestamps: true})
 export class Bulletin {
     @Prop({type: Types.ObjectId,ref: Employe.name,required: true,autopopulate: true})
-    employe: string
+    employe: string | Employe
 
-    @Prop({type: Types.ObjectId,ref: Lot.name,required: true,autopopulate: true})
-    lot: string
+    @Prop({type: Types.ObjectId,ref: Lot.name,required: true,autopopulate: {maxDepth: 2}})
+    lot: Lot | string 
 
     @Prop({type: Object, required: true})
     lignes: object
