@@ -4,6 +4,7 @@ import { CreateEmployeDto } from './dto/create-employe.dto';
 import { UpdateEmployeDto } from './dto/update-employe.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { existsSync, unlinkSync } from 'fs';
+import { v4 as uuidv4, v4 } from 'uuid';
 
 @Controller('employe')
 export class EmployeController {
@@ -37,6 +38,16 @@ export class EmployeController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.employeService.findOne(id);
+  }
+
+  @Post('updatecode')
+  async updateAllCode() {
+    const employes = await this.findAll();
+    employes.forEach(async (e) => {
+      if(!e.code){
+        await this.employeService.update(e._id,{code: v4()})
+      }
+    })
   }
 
   @Patch(':id')

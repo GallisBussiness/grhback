@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
 import { LotService } from './lot.service';
 import { CreateLotDto } from './dto/create-lot.dto';
 import { UpdateLotDto } from './dto/update-lot.dto';
@@ -21,7 +21,9 @@ import { NominationService } from 'src/nomination/nomination.service';
 import { Nomination } from 'src/nomination/entities/nomination.entity';
 import { ImpotService } from 'src/impot/impot.service';
 import { PdfMaker } from './helpers/pdf.maker';
-// import { PdfMaker } from './helpers/pdf.maker';
+import { RegistreService } from 'src/registre/registre.service';
+import { glob } from 'glob';
+import { join } from 'path';
 
 @Controller('lot')
 export class LotController {
@@ -33,7 +35,8 @@ export class LotController {
     private readonly attributionFonctionnelleService: AttributionFonctionnelleService,
     private readonly attributionIndividuelleService: AttributionIndividuelleService,
     private readonly exclusionSpecifiqueService: ExclusionSpecifiqueService,
-    private readonly nominationService: NominationService
+    private readonly nominationService: NominationService,
+    private readonly registreService: RegistreService
     ) {}
 
   @Post()
@@ -55,14 +58,25 @@ export class LotController {
        const {brut:b,ipres:i} = await this.determinationGains(emp,bulletin,brut,ipres,attG);
        await this.determinationRetenues(emp,bulletin,b,i,attG);
        bulletins.push(bulletin);
-       try {
-        pdf.make(bulletin)
-      } catch (error) {
-        throw new Error(error)
-      }
   }
-  // pdf.makeAll(bulletins);
-  return bulletins;
+  const curR = await this.registreService.findByAnneeAndMois(lot.annee,lot.mois);
+  if(curR){
+    await this.registreService.update(curR._id,{bulletins});
+  }else {
+    await this.registreService.create({annee:lot.annee,mois:lot.mois,bulletins});
+  }
+  const prevReg = await this.registreService.findByAnneeAndOldMois(lot.annee,lot.mois);
+  bulletins.forEach(b => {
+    const olds = prevReg.map(r => r.bulletins.find(bu => bu.employe['_id'].toString() === b.employe['_id'].toString()));
+    try {
+    pdf.make(b,olds)
+  } catch (error) {
+    throw new Error(error)
+  }
+  })
+  
+  pdf.makeAll(bulletins,lot,prevReg);
+  return `uploads/bulletins/${lot.mois}-${lot.annee}.pdf`;
 }
 
   async determinationGains(emp: Employe,bulletin: Bulletin,brut: number,ipres: number,attG:AttributionGlobale[]){
@@ -137,7 +151,8 @@ export class LotController {
         f.montant = r.valeur_par_defaut;
         f.taux1 = 100;
       }
-      f.rubrique = r.rubrique;
+      const {section,code,libelle} = r.rubrique;
+      f.rubrique = {section: {nom:section.nom},code,libelle};
       if(r.rubrique.code === 1010){
           if(parseInt(emp.categorie.code.toString()[0],10) === 4){
             bulletin.lignes['retenues'].push(f);
@@ -146,7 +161,6 @@ export class LotController {
       else {
         bulletin.lignes['retenues'].push(f);
       }
-      
     })
     // RETENUES INDIVIDUELLES
 
@@ -256,7 +270,8 @@ export class LotController {
       else {
         f.montant = a.valeur_par_defaut;
       }
-      f.rubrique = a.rubrique;
+      const {section,code,libelle} = a.rubrique;
+      f.rubrique = {section: {nom:section.nom},code,libelle};
       if(a.rubrique.section.nom === SECTIONNAME.IMPOSABLE) {
         brut += f.montant;
       }
@@ -275,7 +290,8 @@ export class LotController {
           const f = new this.figModel();
           f.base = g.valeur_par_defaut;
           f.montant = g.valeur_par_defaut;
-          f.rubrique = g.rubrique;
+          const {section,code,libelle} = g.rubrique;
+          f.rubrique = {section: {nom:section.nom},code,libelle};
           if(g.rubrique.section.nom === SECTIONNAME.IMPOSABLE){
             brut += f.montant;
           }
@@ -317,7 +333,8 @@ export class LotController {
         f.montant = g.valeur_par_defaut;
         f.base = g.valeur_par_defaut;
       }
-      f.rubrique = g.rubrique;
+      const {section,code,libelle} = g.rubrique;
+      f.rubrique = {section: {nom:section.nom},code,libelle};
       if(g.rubrique.section.nom === SECTIONNAME.IMPOSABLE){
         brut += f.montant;
       }
@@ -371,6 +388,12 @@ export class LotController {
   async findTrimf(brut:number){
     const impot = await this.impotService.findOneByVal(brut);
     return impot ? impot.trimf : 0;
+  }
+
+  @Get('getbulletins/:id')
+  async findBulletin(@Param('id') id: string) {
+    const files = await  glob(`uploads/bulletins/${id}-*.pdf`);
+    return files;
   }
 
   @Get()

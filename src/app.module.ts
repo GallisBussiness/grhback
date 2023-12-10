@@ -1,5 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmployeModule } from './employe/employe.module';
 import { PresenceModule } from './presence/presence.module';
@@ -26,6 +25,7 @@ import { AttributionIndividuelleModule } from './attribution-individuelle/attrib
 import { ExclusionSpecifiqueModule } from './exclusion-specifique/exclusion-specifique.module';
 import { LotModule } from './lot/lot.module';
 import { BulletinModule } from './bulletin/bulletin.module';
+import { RegistreModule } from './registre/registre.module';
 
 @Module({
   imports: [
@@ -55,9 +55,8 @@ import { BulletinModule } from './bulletin/bulletin.module';
      FonctionModule, TypedocumentModule, DocumentModule, 
      NominationModule, AttributionFonctionnelleModule,
       AttributionGlobaleModule, AttributionIndividuelleModule,
-       ExclusionSpecifiqueModule, LotModule, BulletinModule,
+       ExclusionSpecifiqueModule, LotModule, BulletinModule, RegistreModule,
       ],
-  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {

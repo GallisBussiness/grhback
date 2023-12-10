@@ -10,6 +10,7 @@ import { ExclusionSpecifiqueModule } from 'src/exclusion-specifique/exclusion-sp
 import { AttributionIndividuelleModule } from 'src/attribution-individuelle/attribution-individuelle.module';
 import { NominationModule } from 'src/nomination/nomination.module';
 import { ImpotModule } from 'src/impot/impot.module';
+import { RegistreModule } from 'src/registre/registre.module';
 
 @Module({
   imports:[MongooseModule.forFeature([{name: Lot.name,schema: LotSchema}]),
@@ -19,7 +20,8 @@ import { ImpotModule } from 'src/impot/impot.module';
   ExclusionSpecifiqueModule,
   AttributionIndividuelleModule,
   NominationModule,
-  ImpotModule
+  ImpotModule,
+  RegistreModule
 ],
   controllers: [LotController],
   providers: [LotService],

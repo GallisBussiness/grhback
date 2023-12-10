@@ -1,4 +1,4 @@
-import { IsMongoId } from "class-validator";
+import { IsMongoId, IsObject } from "class-validator";
 
 export class CreateBulletinDto {
     @IsMongoId()
@@ -6,4 +6,7 @@ export class CreateBulletinDto {
 
     @IsMongoId()
     lot: string;
+
+    @IsObject()
+    lignes: object;
 }

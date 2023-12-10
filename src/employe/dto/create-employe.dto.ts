@@ -1,9 +1,15 @@
 import { Optional } from "@nestjs/common";
-import { IsBoolean, IsDateString, IsMongoId, IsNumber, IsPhoneNumber, IsString } from "class-validator";
+import { IsBoolean, IsDateString, IsMongoId, IsNumber, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class CreateEmployeDto {
     @IsString()
     prenom: string;
+
+
+    @IsOptional()
+    @IsString()
+    code: string;
+
 
     @IsString()
     nom: string;

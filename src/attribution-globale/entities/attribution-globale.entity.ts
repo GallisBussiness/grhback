@@ -9,7 +9,7 @@ export class AttributionGlobale {
     
     _id: string;
 
-    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true, autopopulate: true,unique: true})
+    @Prop({type: Types.ObjectId,ref: Rubrique.name, required: true, autopopulate: {maxDepth:2},unique: true})
     rubrique: Rubrique;
 
     @Prop({type: Number, required: true, default: 0})

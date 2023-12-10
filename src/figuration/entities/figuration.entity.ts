@@ -1,14 +1,11 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, Types } from "mongoose";
-import { Rubrique } from "src/rubrique/entities/rubrique.entity";
+import { HydratedDocument } from "mongoose";
 
 export type FigurationDocument = HydratedDocument<Figuration>
 
 @Schema()
 export class Figuration {
-    @Prop({type: Types.ObjectId,ref: Rubrique.name,required:true})
-    rubrique: Rubrique  | string;
-
+   
     @Prop({type: Number,required: true,default:0})
     montant: number
 
@@ -20,6 +17,9 @@ export class Figuration {
 
     @Prop({type: Number,required: true,default:0})
     base: number
+
+    @Prop({type: Object,required:true})
+    rubrique: object;
 }
 
 export const FigurationSchema = SchemaFactory.createForClass(Figuration);

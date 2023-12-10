@@ -5,6 +5,9 @@ export type LotDocument = HydratedDocument<Lot>
 
 @Schema({timestamps: true})
 export class Lot {
+
+    _id: string;
+
     @Prop({type: String,required: true})
     libelle: string;
 
