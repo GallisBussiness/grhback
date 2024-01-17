@@ -1,5 +1,4 @@
 import { HttpException } from "@nestjs/common";
-import { Model } from "mongoose";
 
 export class AbstractModel<T,C,U> {
     constructor(

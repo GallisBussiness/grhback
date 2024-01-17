@@ -1,4 +1,4 @@
-import { IsNumber, IsObject } from "class-validator";
+import { IsNumber, IsObject, IsString } from "class-validator";
 import { Bulletin } from "src/bulletin/entities/bulletin.entity";
 
 export class CreateRegistreDto {
@@ -7,6 +7,9 @@ export class CreateRegistreDto {
 
     @IsNumber()
     mois: number;
+
+    @IsString()
+    lot:string;
 
     @IsObject()
     bulletins: Bulletin[];

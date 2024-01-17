@@ -27,4 +27,12 @@ export class NominationService extends AbstractModel<Nomination,CreateNomination
       throw new HttpException(error.message,500)
     }
   }
+
+  async toggleState(id: string, dto: {est_active: boolean}):Promise<Nomination> {
+    try {
+     return this.nominationModel.findByIdAndUpdate(id,dto)
+    } catch (error) {
+      throw new HttpException(error.message, 500);
+    }
+   }
 }

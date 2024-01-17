@@ -12,7 +12,6 @@ import { SessionModule } from './session/session.module';
 import { RubriqueModule } from './rubrique/rubrique.module';
 import { SectionModule } from './section/section.module';
 import { CategorieModule } from './categorie/categorie.module';
-import { ImpotModule } from './impot/impot.module';
 import { DivisionModule } from './division/division.module';
 import { ServiceModule } from './service/service.module';
 import { FonctionModule } from './fonction/fonction.module';
@@ -26,6 +25,9 @@ import { ExclusionSpecifiqueModule } from './exclusion-specifique/exclusion-spec
 import { LotModule } from './lot/lot.module';
 import { BulletinModule } from './bulletin/bulletin.module';
 import { RegistreModule } from './registre/registre.module';
+import { TemporaireModule } from './temporaire/temporaire.module';
+import { FonctiontempModule } from './fonctiontemp/fonctiontemp.module';
+import { DocModule } from './doc/doc.module';
 
 @Module({
   imports: [
@@ -56,6 +58,10 @@ import { RegistreModule } from './registre/registre.module';
      NominationModule, AttributionFonctionnelleModule,
       AttributionGlobaleModule, AttributionIndividuelleModule,
        ExclusionSpecifiqueModule, LotModule, BulletinModule, RegistreModule,
+       CategorieModule,
+       TemporaireModule,
+       FonctiontempModule,
+       DocModule
       ],
   providers: [AppService],
 })

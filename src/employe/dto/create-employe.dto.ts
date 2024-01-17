@@ -1,5 +1,4 @@
-import { Optional } from "@nestjs/common";
-import { IsBoolean, IsDateString, IsMongoId, IsNumber, IsOptional, IsPhoneNumber, IsString } from "class-validator";
+import { IsMongoId, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateEmployeDto {
     @IsString()
@@ -10,6 +9,10 @@ export class CreateEmployeDto {
     @IsString()
     code: string;
 
+    @IsOptional()
+    @IsString()
+    password: string;
+
 
     @IsString()
     nom: string;
@@ -17,7 +20,7 @@ export class CreateEmployeDto {
     @IsString()
     qualification: string;
 
-    @IsDateString()
+    @IsString()
     date_de_recrutement: string;
 
     @IsString()
@@ -50,19 +53,16 @@ export class CreateEmployeDto {
     @IsNumber()
     nombre_de_parts: number;
 
-    @IsDateString()
+    @IsString()
     date_de_naissance: string;
 
     @IsString()
     lieu_de_naissance: string;
 
-    @Optional()
+    @IsOptional()
     @IsString()
     profile: string;
 
     @IsMongoId()
     categorie: string;
-
-    @IsNumber()
-    is_actif: number;
 }

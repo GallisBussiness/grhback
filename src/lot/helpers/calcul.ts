@@ -100,7 +100,16 @@ export class Calcul {
 
     getTotaux = (arr) => {
         const total = arr.reduce((acc,cur) => acc + cur.montant,0);
-        const totalpp = arr.reduce((acc,cur) => cur.taux2 ? acc + Math.round(cur.taux2 * cur.montant / 100): acc + 0,0);
+        const totalpp = arr.reduce((acc,cur) => cur.taux2 ? acc + Math.round(cur.taux2 * cur.base / 100): acc + 0,0);
         return {total,totalpp};
+    }
+
+    getIpReComCadre(bulletins: Bulletin[]){
+        const lignes = [];
+        bulletins.filter(bu => {
+            bu.lignes['retenues'];
+        }).forEach(b => {
+
+        })
     }
 }

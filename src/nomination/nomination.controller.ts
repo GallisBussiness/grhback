@@ -22,7 +22,7 @@ export class NominationController {
     return this.nominationService.findByEmploye(emp);
   }
 
-  @Get('byemploye/:emp')
+  @Get('byemployeactive/:emp')
   findActiveByEmploye(@Param('emp') emp: string) {
     return this.nominationService.findActiveByEmploye(emp);
   }
@@ -35,6 +35,11 @@ export class NominationController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateNominationDto: UpdateNominationDto) {
     return this.nominationService.update(id, updateNominationDto);
+  }
+
+  @Patch('/toggle/:id')
+  toggleState(@Param('id') id: string, @Body() updateStateDto: {est_active: boolean}) {
+    return this.nominationService.toggleState(id, updateStateDto);
   }
 
   @Delete(':id')

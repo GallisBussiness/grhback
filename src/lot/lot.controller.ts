@@ -23,7 +23,6 @@ import { ImpotService } from 'src/impot/impot.service';
 import { PdfMaker } from './helpers/pdf.maker';
 import { RegistreService } from 'src/registre/registre.service';
 import { glob } from 'glob';
-import { join } from 'path';
 
 @Controller('lot')
 export class LotController {
@@ -59,23 +58,24 @@ export class LotController {
        await this.determinationRetenues(emp,bulletin,b,i,attG);
        bulletins.push(bulletin);
   }
-  const curR = await this.registreService.findByAnneeAndMois(lot.annee,lot.mois);
+  let curR = await this.registreService.findByAnneeAndMois(lot.annee,lot.mois);
   if(curR){
     await this.registreService.update(curR._id,{bulletins});
   }else {
-    await this.registreService.create({annee:lot.annee,mois:lot.mois,bulletins});
+    curR = await this.registreService.create({lot: lot._id,annee:lot.annee,mois:lot.mois,bulletins});
   }
   const prevReg = await this.registreService.findByAnneeAndOldMois(lot.annee,lot.mois);
+  const idReg   = curR._id.toString();
   bulletins.forEach(b => {
-    const olds = prevReg.map(r => r.bulletins.find(bu => bu.employe['_id'].toString() === b.employe['_id'].toString()));
+    const olds = prevReg?.bulletins?.filter(bu => bu.employe['_id'].toString() === b.employe['_id'].toString()) ?? [];
     try {
-    pdf.make(b,olds)
+    pdf.make(b,olds,idReg);
   } catch (error) {
     throw new Error(error)
   }
   })
   
-  pdf.makeAll(bulletins,lot,prevReg);
+  pdf.makeAll(bulletins,lot,idReg,prevReg);
   return `uploads/bulletins/${lot.mois}-${lot.annee}.pdf`;
 }
 
@@ -412,7 +412,9 @@ export class LotController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.lotService.remove(id);
+  async remove(@Param('id') id: string) {
+    const lot = await this.lotService.remove(id);
+    await this.registreService.removeByLot(id);
+    return lot;
   }
 }

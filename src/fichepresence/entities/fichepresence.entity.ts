@@ -24,7 +24,7 @@ export class Fichepresence {
     @Prop({type: String})
     description: string;
 
-    @Prop({type: String, default: uuidv4()})
+    @Prop({type: String, default: uuidv4})
     code: string;
 
     @Prop({type: String})

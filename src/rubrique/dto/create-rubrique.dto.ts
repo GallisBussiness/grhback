@@ -1,10 +1,10 @@
-import { IsMongoId, IsString } from "class-validator";
+import { IsMongoId, IsNumber, IsString } from "class-validator";
 
 export class CreateRubriqueDto {
     @IsString()
      libelle: string;
 
-    @IsString()
+    @IsNumber()
     code: string;
 
     @IsMongoId()

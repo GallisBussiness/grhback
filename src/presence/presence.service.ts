@@ -21,6 +21,14 @@ export class PresenceService extends AbstractModel<Presence,CreatePresenceDto,Up
   }
  }
 
+ async findByFicheAndEmploye(fiche: string,employe: string):Promise<Presence[]> {
+  try {
+    return await this.presenceModel.find({fiche,employe}).sort( { createdAt : -1} );
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
  async createArrive(data: CreatePresenceDto):Promise<Presence> {
   try {
     const type = TYPEPRESENCE.ARRIVEE;

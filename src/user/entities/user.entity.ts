@@ -2,7 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 export enum USER_ROLE {
-  USER = 'user',
+  CSA = 'csa',
+  RH = 'rh',
   ADMIN = 'admin',
 }
 
@@ -27,7 +28,7 @@ export class User {
   @Prop({ type: String })
   resetPasswordToken: string;
 
-  @Prop({ type: String, default: USER_ROLE.USER })
+  @Prop({ type: String, default: USER_ROLE.RH })
   role: string;
 }
 

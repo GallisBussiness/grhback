@@ -1,4 +1,4 @@
-import { Injectable,HttpException } from '@nestjs/common';
+import { Injectable,HttpException, UnauthorizedException } from '@nestjs/common';
 import { CreateEmployeDto } from './dto/create-employe.dto';
 import { UpdateEmployeDto } from './dto/update-employe.dto';
 import { AbstractModel } from 'src/utils/abstractmodel';
@@ -20,6 +20,18 @@ export class EmployeService extends AbstractModel<Employe,CreateEmployeDto,Updat
   }
  }
 
+ async updatePassword(id: string,dto: {oldPass: string,newPass: string}):Promise<Boolean> {
+  try {
+    const user = await this.findOne(id);
+    if (!user || user.password !== dto.oldPass) {
+        throw new UnauthorizedException();
+    }
+    return await this.employeModel.findByIdAndUpdate(id,{$set:{password:dto.newPass}});
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
  async findActive():Promise<Employe[]> {
   try {
     return await this.employeModel.find({is_actif: true})
@@ -35,4 +47,13 @@ export class EmployeService extends AbstractModel<Employe,CreateEmployeDto,Updat
     throw new HttpException(error.message, 500)
   }
  }
+
+ async toggleState(id: string, dto: {is_actif: boolean}):Promise<Employe> {
+  try {
+   return this.employeModel.findByIdAndUpdate(id,dto)
+  } catch (error) {
+    throw new HttpException(error.message, 500);
+  }
+ }
+
 }

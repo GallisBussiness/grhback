@@ -10,6 +10,9 @@ export class Registre {
   @Prop({type: Number,required: true})
   annee: number;
 
+  @Prop({type: String,required: true})
+  lot: string;
+
   @Prop({type: Number,required: true})
   mois: number;
 

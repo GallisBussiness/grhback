@@ -6,6 +6,8 @@ import { Fichepresence, FichepresenceDocument } from './entities/fichepresence.e
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MonthDto } from './dto/month.dto';
+import { Presence } from 'src/presence/entities/presence.entity';
+import { compareAsc, parseISO } from 'date-fns';
 
 @Injectable()
 export class FichepresenceService extends AbstractModel<Fichepresence,CreateFichepresenceDto,UpdateFichepresenceDto>{
@@ -15,6 +17,14 @@ export class FichepresenceService extends AbstractModel<Fichepresence,CreateFich
  async findOpened():Promise<Fichepresence[]> {
   try {
    return this.ficheModel.find({isOpen: true})
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
+ async findByCode(code: string):Promise<Fichepresence> {
+  try {
+   return this.ficheModel.findOne({code})
   } catch (error) {
     throw new HttpException(error.message, 500)
   }
@@ -57,7 +67,7 @@ export class FichepresenceService extends AbstractModel<Fichepresence,CreateFich
   }
  }
 
- async getByMonth(monthDto: MonthDto):Promise<Fichepresence[]> {
+ async getByMonth(monthDto: MonthDto):Promise<any> {
   try {
    return this.ficheModel.aggregate([{
     $match: {
@@ -94,6 +104,25 @@ export class FichepresenceService extends AbstractModel<Fichepresence,CreateFich
     as: "presences",
   }
  }])
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+ async getByMonthAndEmploye(monthDto: MonthDto & {employe: string}):Promise<Presence[]> {
+  try {
+   const fiches = (await this.getByMonth({annee:monthDto.annee,mois: monthDto.mois}));
+   if(fiches && fiches.length !== 0){
+    let presences = [];
+    fiches.forEach(f => {
+      const p = f['presences'].filter(p => p.employe._id.toString() === monthDto.employe);
+      presences = [...presences,...p];
+    });
+    
+    return presences.sort((a,b) => compareAsc(parseISO(a.heure),parseISO(b.heure))).reverse();
+   }else{
+    return [];
+   }
+
   } catch (error) {
     throw new HttpException(error.message, 500)
   }

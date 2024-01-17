@@ -1,10 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors,UploadedFile,HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors,UploadedFile,HttpException, UnauthorizedException, HttpCode } from '@nestjs/common';
 import { EmployeService } from './employe.service';
 import { CreateEmployeDto } from './dto/create-employe.dto';
 import { UpdateEmployeDto } from './dto/update-employe.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { existsSync, unlinkSync } from 'fs';
-import { v4 as uuidv4, v4 } from 'uuid';
 
 @Controller('employe')
 export class EmployeController {
@@ -20,6 +19,17 @@ export class EmployeController {
     return this.employeService.create(createEmployeDto);
   }
 
+  
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() loginDto: {code:string,pass:string}){
+    const employe = await this.employeService.findByCode(loginDto.code);
+    if(!employe || employe.password !== loginDto.pass){
+      throw new UnauthorizedException();
+    }
+    return employe;
+  }
+
   @Get()
   findAll() {
     return this.employeService.findAll();
@@ -29,6 +39,7 @@ export class EmployeController {
   findByCode(@Param('code') code: string) {
     return this.employeService.findByCode(code);
   }
+  
 
   @Get("bymatsolde/:mat")
   findByMat(@Param('mat') mat: string) {
@@ -40,19 +51,14 @@ export class EmployeController {
     return this.employeService.findOne(id);
   }
 
-  @Post('updatecode')
-  async updateAllCode() {
-    const employes = await this.findAll();
-    employes.forEach(async (e) => {
-      if(!e.code){
-        await this.employeService.update(e._id,{code: v4()})
-      }
-    })
-  }
-
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEmployeDto: UpdateEmployeDto) {
     return this.employeService.update(id, updateEmployeDto);
+  }
+
+  @Patch('updatepassword/:id')
+  updatePassword(@Param('id') id: string, @Body() updatepass: {oldPass: string,newPass: string}) {
+    return this.employeService.updatePassword(id, updatepass);
   }
 
   @Patch('profile/:id')
@@ -67,6 +73,11 @@ export class EmployeController {
       return em;
     }
    throw new HttpException("Profile Non Uploade !!",500);
+  }
+
+  @Patch('/toggle/:id')
+  toggleState(@Param('id') id: string, @Body() updateStateDto: {is_actif: boolean}) {
+    return this.employeService.toggleState(id, updateStateDto);
   }
 
   @Delete(':id')

@@ -13,7 +13,7 @@ _id:string;
 @Prop({type: String,required: true})
 libelle:string;
 
-@Prop({type: Number,required: true})
+@Prop({type: Number,required: true,unique:true})
 code:number;
 
 @Prop({type: Types.ObjectId, required: true,ref: Section.name, autopopulate: {maxDepth: 2}})

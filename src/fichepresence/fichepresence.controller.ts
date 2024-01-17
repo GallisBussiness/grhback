@@ -19,6 +19,11 @@ export class FichepresenceController {
     return this.fichepresenceService.getByMonth(monthDto);
   }
 
+  @Post("getbymonthandemploye")
+  getFicheByMonthAndEmploye(@Body() monthDto: MonthDto & {employe: string}) {
+    return this.fichepresenceService.getByMonthAndEmploye(monthDto);
+  }
+
   @Get()
   findAll() {
     return this.fichepresenceService.findAll();    
@@ -27,6 +32,11 @@ export class FichepresenceController {
   @Get("/opened")
   findOpened() {
     return this.fichepresenceService.findOpened();
+  }
+
+  @Get('bycode/:code')
+  findByCode(@Param('code')  code: string) {
+    return this.fichepresenceService.findByCode(code);
   }
 
   @Get(':id')

@@ -12,9 +12,9 @@ export class RegistreService extends AbstractModel<Registre,CreateRegistreDto,Up
     super(registreModel);
   }
 
-  async findByAnneeAndOldMois(annee: number,mois: number): Promise<Registre[]> {
+  async findByAnneeAndOldMois(annee: number,mois: number): Promise<Registre> {
       try {
-        return await this.registreModel.find({$and:[{annee},{mois:{$lte:mois}}]});
+        return await this.registreModel.findOne({$and:[{annee},{mois:{$lt:mois}}]});
       } catch (error) {
         throw new HttpException(error.message,500);
       }
@@ -26,5 +26,13 @@ export class RegistreService extends AbstractModel<Registre,CreateRegistreDto,Up
     } catch (error) {
       throw new HttpException(error.message,500);
     }
+}
+
+async removeByLot(id: string): Promise<Registre> {
+  try {
+    return await this.registreModel.findOneAndDelete({lot:id});
+  } catch (error) {
+    throw new HttpException(error.message,500);
+  }
 }
 }

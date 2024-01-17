@@ -7,6 +7,7 @@ export type BulletinDocument = HydratedDocument<Bulletin>
 
 @Schema({timestamps: true})
 export class Bulletin {
+
     @Prop({type: Types.ObjectId,ref: Employe.name,required: true,autopopulate: true})
     employe: string | Employe
 

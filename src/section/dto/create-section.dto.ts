@@ -1,6 +1,6 @@
-import { IsString } from "class-validator";
+import {IsString } from "class-validator";
 
 export class CreateSectionDto {
     @IsString()
-    nom: string
+    nom: string;
 }

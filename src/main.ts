@@ -15,8 +15,6 @@ async function bootstrap() {
     prefix: '/uploads/',
     setHeaders: (res, path, stat) => {
       res.set('Access-Control-Allow-Origin', '*');
-      res.set('Access-Control-Allow-Headers', 'Range');
-      res.set('Access-Control-Expose-Headers', 'Accept-Ranges, Content-Encoding, Content-Length, Content-Range');
     }
   });
   app.use(helmet());

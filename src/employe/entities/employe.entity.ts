@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
+import { format } from "date-fns";
 import { Document, Types } from "mongoose";
 import { Categorie } from "src/categorie/entities/categorie.entity";
 import { v4 as uuidv4 } from 'uuid';
@@ -21,10 +22,13 @@ export class Employe {
     @Prop({type: String, default: uuidv4})
     code: string;
 
+    @Prop({type: String, default: '123456'})
+    password: string;
+
     @Prop({type:String, required: true})
     qualification: string;
 
-    @Prop({type:String, required: true})
+    @Prop({type:String, required: true,set:(v: string) => format(new Date(v),"yyyy-MM-dd")})
     date_de_recrutement: string;
 
     @Prop({type:String, required: true})
@@ -57,7 +61,7 @@ export class Employe {
     @Prop({type:Number, required: true})
     nombre_de_parts: number;
 
-    @Prop({type:String, required: true})
+    @Prop({type:String, required: true,set:(v: string) => format(new Date(v),"yyyy-MM-dd")})
     date_de_naissance: string;
 
     @Prop({type:String, required: true})
@@ -70,7 +74,7 @@ export class Employe {
     @Type(() => Categorie)
     categorie: Categorie;
 
-    @Prop({type:Number, required: true, default: 1})
+    @Prop({type:Number, required: true, default: true})
     is_actif: number;
 }
 

@@ -4,6 +4,7 @@ export class CreateNominationDto {
     @IsString()
     date: string;
 
+    @IsOptional()
     @IsString()
     description: string;
 

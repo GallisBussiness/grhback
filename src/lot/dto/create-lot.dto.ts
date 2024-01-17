@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
 export class CreateLotDto {
     @IsString()
@@ -9,4 +9,8 @@ export class CreateLotDto {
 
     @IsString()
     fin: string;
+
+    @IsOptional()
+    @IsString()
+    etat: string;
 }

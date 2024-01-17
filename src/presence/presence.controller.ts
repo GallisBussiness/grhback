@@ -27,6 +27,11 @@ export class PresenceController {
     return this.presenceService.findByFiche(fiche);
   }
 
+  @Get('by/:fiche/:employe')
+  findByFicheAndEmploye(@Param('fiche') fiche: string,@Param('employe') employe: string) {
+    return this.presenceService.findByFicheAndEmploye(fiche,employe);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.presenceService.findOne(id);
