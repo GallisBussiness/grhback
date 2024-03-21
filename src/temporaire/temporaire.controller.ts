@@ -3,7 +3,6 @@ import { TemporaireService } from './temporaire.service';
 import { CreateTemporaireDto } from './dto/create-temporaire.dto';
 import { UpdateTemporaireDto } from './dto/update-temporaire.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { existsSync, unlinkSync } from 'fs';
 
 @Controller('temporaire')
 export class TemporaireController {
@@ -32,16 +31,8 @@ export class TemporaireController {
 
   @Patch('profile/:id')
   @UseInterceptors(FileInterceptor('profile'))
-  async updateProfile(@UploadedFile() profile: Express.Multer.File,@Param('id') id: string,@Body() updateEmployeDto: UpdateTemporaireDto) {
-    if(profile){
-      updateEmployeDto.profile  = profile.filename;
-      const em = await this.temporaireService.update(id,updateEmployeDto);
-      if(em && existsSync("uploads/profiles/" + em.profile)){
-        unlinkSync("uploads/profiles/" + em.profile);
-      }
-      return em;
-    }
-   throw new HttpException("Profile Non Uploade !!",500);
+  updateProfile(@Param('id') id: string,@Body() updateEmployeDto: UpdateTemporaireDto) {
+      return this.temporaireService.update(id,updateEmployeDto);
   }
 
   @Delete(':id')

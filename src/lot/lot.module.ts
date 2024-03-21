@@ -11,6 +11,7 @@ import { AttributionIndividuelleModule } from 'src/attribution-individuelle/attr
 import { NominationModule } from 'src/nomination/nomination.module';
 import { ImpotModule } from 'src/impot/impot.module';
 import { RegistreModule } from 'src/registre/registre.module';
+import { CaslModule } from 'src/casl/casl.module';
 
 @Module({
   imports:[MongooseModule.forFeature([{name: Lot.name,schema: LotSchema}]),
@@ -21,7 +22,8 @@ import { RegistreModule } from 'src/registre/registre.module';
   AttributionIndividuelleModule,
   NominationModule,
   ImpotModule,
-  RegistreModule
+  RegistreModule,
+  CaslModule,
 ],
   controllers: [LotController],
   providers: [LotService],

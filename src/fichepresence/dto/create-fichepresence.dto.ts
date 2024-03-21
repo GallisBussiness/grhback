@@ -3,7 +3,7 @@ import { IsBoolean,IsOptional, IsString } from "class-validator";
 export class CreateFichepresenceDto {
    
     @IsString()
-    date: Date;
+    date: string;
 
     @IsString()
     mois: string;
@@ -13,7 +13,7 @@ export class CreateFichepresenceDto {
 
     @IsOptional()
     @IsBoolean()
-    isOpen: boolean;
+    isOpen?: boolean;
 
     @IsString()
     description: string;

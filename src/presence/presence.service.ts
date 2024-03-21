@@ -12,7 +12,6 @@ export class PresenceService extends AbstractModel<Presence,CreatePresenceDto,Up
   super(presenceModel);
  }
 
-
  async findByFiche(fiche: string):Promise<Presence[]> {
   try {
     return await this.presenceModel.find({fiche}).sort( { createdAt : -1} );

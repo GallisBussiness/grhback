@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpException } from '@nestjs/common';
 import { LotService } from './lot.service';
 import { CreateLotDto } from './dto/create-lot.dto';
 import { UpdateLotDto } from './dto/update-lot.dto';
@@ -9,7 +9,7 @@ import { Bulletin } from 'src/bulletin/entities/bulletin.entity';
 import { AttributionGlobaleService } from 'src/attribution-globale/attribution-globale.service';
 import { AttributionFonctionnelleService } from 'src/attribution-fonctionnelle/attribution-fonctionnelle.service';
 import { ExclusionSpecifiqueService } from 'src/exclusion-specifique/exclusion-specifique.service';
-import { differenceBy, round } from 'lodash';
+import { differenceBy, flatten, round } from 'lodash';
 import { AttributionGlobale } from 'src/attribution-globale/entities/attribution-globale.entity';
 import { SECTIONNAME } from 'src/section/entities/section.entity';
 import { Employe } from 'src/employe/entities/employe.entity';
@@ -23,6 +23,12 @@ import { ImpotService } from 'src/impot/impot.service';
 import { PdfMaker } from './helpers/pdf.maker';
 import { RegistreService } from 'src/registre/registre.service';
 import { glob } from 'glob';
+import { unlinkSync } from 'fs';
+import { CheckAbility } from 'src/casl/policy.decorator';
+import { Action } from 'src/casl/casl-ability.factory';
+import { Lot } from './entities/lot.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { CaslGuard } from 'src/casl/casl.guard';
 
 @Controller('lot')
 export class LotController {
@@ -54,48 +60,58 @@ export class LotController {
        let bulletin:Bulletin = {employe: emp,lignes:{gains:[],retenues:[]},lot};
        let brut = 0;
        let ipres = 0;
-       const {brut:b,ipres:i} = await this.determinationGains(emp,bulletin,brut,ipres,attG);
-       await this.determinationRetenues(emp,bulletin,b,i,attG);
+       let fnr = 0;
+       const {brut:b,ipres:i,fnr:f} = await this.determinationGains(emp,bulletin,brut,fnr,ipres,attG);
+       await this.determinationRetenues(emp,bulletin,b,i,f,attG);
        bulletins.push(bulletin);
   }
   let curR = await this.registreService.findByAnneeAndMois(lot.annee,lot.mois);
   if(curR){
     await this.registreService.update(curR._id,{bulletins});
   }else {
-    curR = await this.registreService.create({lot: lot._id,annee:lot.annee,mois:lot.mois,bulletins});
+    curR = await this.registreService.create({lot: lot._id.toString(),annee:lot.annee,mois:lot.mois,bulletins});
   }
   const prevReg = await this.registreService.findByAnneeAndOldMois(lot.annee,lot.mois);
   const idReg   = curR._id.toString();
   bulletins.forEach(b => {
-    const olds = prevReg?.bulletins?.filter(bu => bu.employe['_id'].toString() === b.employe['_id'].toString()) ?? [];
+    const olds = [];
+    prevReg.forEach(r => {
+      olds.push(r?.bulletins?.filter(bu => bu.employe['_id'].toString() === b.employe['_id'].toString()) ?? [])
+    })
     try {
-    pdf.make(b,olds,idReg);
+    pdf.make(b,flatten(olds),idReg);
   } catch (error) {
-    throw new Error(error)
+    throw new HttpException(error.message,500);
   }
   })
-  
-  pdf.makeAll(bulletins,lot,idReg,prevReg);
-  return `uploads/bulletins/${lot.mois}-${lot.annee}.pdf`;
+  try {
+     pdf.makeAll(bulletins,lot,idReg,prevReg);
+  } catch (error) {
+    throw  new HttpException(error.message,500);
+  }
+ 
+  return `uploads/bulletins/${lot._id.toString()}-${lot.mois}-${lot.annee}.pdf`;
 }
 
-  async determinationGains(emp: Employe,bulletin: Bulletin,brut: number,ipres: number,attG:AttributionGlobale[]){
+  async determinationGains(emp: Employe,bulletin: Bulletin,brut: number,fnr:number,ipres: number,attG:AttributionGlobale[]){
     const idemp = emp._id.toString();
     const [exclSpec,attrInd,nomActive] = await Promise.all(
       [this.exclusionSpecifiqueService.findByEmploye(idemp),
       this.attributionIndividuelleService.findByEmploye(idemp),
       this.nominationService.findActiveByEmploye(idemp)
-    ])
+    ]);
+
+    
    
-   const {brut:b,ipres:i} =  await this.attributionGlobales(emp,bulletin,brut,ipres,attG,exclSpec);
+   const {brut:b,ipres:i,fnr:f} =  await this.attributionGlobales(emp,bulletin,brut,fnr,ipres,attG,exclSpec);
     const br = await this.attributionFonctionnelle(nomActive,b,bulletin,exclSpec);
-    const {brut: brr,ipres:ii} = await this.attributionIndividuelle(emp,bulletin,br,i,attrInd)
-  return {brut:brr,ipres:ii};
+    const {brut: brr,ipres:ii} = await this.attributionIndividuelle(emp,bulletin,br,i,attrInd);
+  return {brut:brr,ipres:ii,fnr:f};
   }
 
-  async determinationRetenues(emp:Employe,bulletin: Bulletin,brut: number,ipres: number,attG:AttributionGlobale[]){
+  async determinationRetenues(emp:Employe,bulletin: Bulletin,brut: number,ipres: number,fnr:number,attG:AttributionGlobale[]){
     const bi = brut + ipres;
-    const exclSpec = await this.exclusionSpecifiqueService.findByEmploye(emp._id);
+    const exclSpec = await this.exclusionSpecifiqueService.findByEmploye(emp._id.toString());
     const retenues = differenceBy(attG,exclSpec,(v) => v.rubrique._id.toString()).filter(v => v.rubrique.section.nom === SECTIONNAME.RETENUE);
     const [m,t] = await Promise.all([
       this.findImpot(brut,emp.nombre_de_parts),
@@ -124,8 +140,9 @@ export class LotController {
         f.montant = round(f.base * f.taux1 / 100);
         f.taux2 = 8.40;
       }
+      
       //DETEMINATION DE L'IPRES REGIME COMPLEMENTAIRE CADRE
-      else if((r.rubrique.code === 1010) && (parseInt(emp.categorie.code.toString()[0],10) === 4)){
+      else if((r.rubrique.code === 1010) && (parseInt(emp.categorie.code.toString()[0],10) === 4 || emp.categorie.code === 11)){
          f.base = bi >= 1296000 ? 1296000 : bi;
          f.taux1 = 2.40;
          f.montant = round(f.base * f.taux1 / 100);
@@ -154,7 +171,7 @@ export class LotController {
       const {section,code,libelle} = r.rubrique;
       f.rubrique = {section: {nom:section.nom},code,libelle};
       if(r.rubrique.code === 1010){
-          if(parseInt(emp.categorie.code.toString()[0],10) === 4){
+          if(parseInt(emp.categorie.code.toString()[0],10) === 4 || emp.categorie.code === 11){
             bulletin.lignes['retenues'].push(f);
           }
       }
@@ -164,26 +181,36 @@ export class LotController {
     })
     // RETENUES INDIVIDUELLES
 
-    const attrInd = await this.attributionIndividuelleService.findByEmploye(emp._id);
+    const attrInd = await this.attributionIndividuelleService.findByEmploye(emp._id.toString());
     const ri = attrInd.filter(a => a.rubrique.section.nom === SECTIONNAME.RETENUE);
     ri.forEach(r => {
       const f = new this.figModel();
-      // FOND NATIONAL DE RETRAITE
-      if(r.rubrique.code === 1013) {
-        ipres += brut;
-        f.base = ipres >= 432000 ? 432000 : ipres;
-        f.taux1 = 12;
-        f.rubrique = r.rubrique;
-        f.montant = round(f.base * f.taux1 / 100);
-        f.taux2 = 23;
-        bulletin.lignes['retenues'].push(f);
-      }
+     // DETERMINAtION DE FOND NATIONAL DE RETRAITE
+     if(r.rubrique.code === 1013){
+      //salaire de base + indem enseignement 145 + com spec 109 + indem residence 113 + les 3 augs
+      // taux1 = 12
+      // taux2 = 23
+      // 145 => base = salaire de base, taux1 = 50
+      // 109 => base = salaire de base, taux1 = 20
+      // 113 => base = salaire de base, taux1 = 14
+      f.base = emp.categorie.valeur + fnr;
+      f.taux1 = 12;
+      f.montant = round(f.base * f.taux1 / 100);
+      f.taux2 = 23;
+    }
+    else {
+      f.base = r.valeur_par_defaut;
+      f.montant = r.valeur_par_defaut;
+    }
+    const {section,code,libelle} = r.rubrique;
+    f.rubrique = {section: {nom:section.nom},code,libelle};
+    bulletin.lignes['retenues'].push(f);
     })
-    return {brut,ipres};
+    return {brut,ipres,fnr};
   }
 
-  async attributionGlobales(emp: Employe,bulletin: Bulletin,brut: number,ipres: number,attG:AttributionGlobale[],exclSpec: ExclusionSpecifique[]){
-    const diff = differenceBy(attG,exclSpec,(v) => v.rubrique._id.toString()).filter(v => v.rubrique.section.nom != SECTIONNAME.RETENUE);
+  async attributionGlobales(emp: Employe,bulletin: Bulletin,brut: number,fnr: number,ipres: number,attG:AttributionGlobale[],exclSpec: ExclusionSpecifique[]){
+    const diff = differenceBy(attG,exclSpec,(v) => v.rubrique._id.toString()).filter(v => v.rubrique.section.nom !== SECTIONNAME.RETENUE);
     diff.forEach(a => {
       const f = new this.figModel();
 
@@ -191,6 +218,28 @@ export class LotController {
       if(a.rubrique.code === 10){
         f.base = emp.categorie.valeur;
         f.montant = emp.categorie.valeur;
+      }
+
+      // 145 => base = salaire de base, taux1 = 50
+      else if(a.rubrique.code === 145){
+        f.base = emp.categorie.valeur;
+        f.taux1 = 50;
+        f.montant = round(f.base * f.taux1 / 100);
+        fnr += f.montant;
+      }
+
+      else if(a.rubrique.code === 109){
+        f.base = emp.categorie.valeur;
+        f.taux1 = 20;
+        f.montant = round(f.base * f.taux1 / 100);
+        fnr += f.montant;
+      }
+
+      else if(a.rubrique.code === 113){
+        f.base = emp.categorie.valeur;
+        f.taux1 = 14;
+        f.montant = round(f.base * f.taux1 / 100);
+        fnr += f.montant;
       }
       // RAPPEL AUGMENTATION SOLDE GLOBAL
       else if(a.rubrique.code === 321){
@@ -217,6 +266,7 @@ export class LotController {
           f.montant = 26015;
         }
         ipres += f.montant;
+        fnr += f.montant;
       }
       // DETERMINATION AUGMENTATION SOLDE 2000
       else if(a.rubrique.code === 1453){
@@ -234,6 +284,7 @@ export class LotController {
           f.montant = 7633;
         }
         ipres += f.montant;
+        fnr += f.montant;
       }
 
       // DETERMINATION AUGMENTATION SOLDE JANVIER 2002
@@ -245,66 +296,86 @@ export class LotController {
           else {
             f.montant = 10000;
             }
-      ipres += f.montant;      
+      ipres += f.montant;
+      fnr += f.montant;      
       }
       // PRIME ASSUIDITE
       else if(a.rubrique.code === 30){
         const anciennete = this.getAnciennete(emp.date_de_recrutement);
         const vCat = emp.categorie.valeur;
         let value = 0;
-        if(anciennete < 2){
-          value = 0;
-        }
-        else if(anciennete < 6){
-          value = (vCat * anciennete) / 100;
-        }
-        else if(anciennete < 31){
-          value = (vCat * (anciennete + 3)) / 100;
-        }
-        else {
-          value = (vCat * 33)/100;
-          f.base = vCat;
-          f.montant = value;
-        }
-      }
+        let aug2000 = 0;
+        const r = parseInt(emp.categorie.code.toString().substring(0,1),10);
+              if(r=== 1){
+                aug2000 = 5456;
+              }
+              else if(r === 2){
+                aug2000 = 5676;
+              }
+              else if(r===3){
+                aug2000 = 6294;
+              }
+              else {
+                aug2000 = 7633;
+              }
+
+                if(anciennete < 2){
+                  value = 0;
+                }
+                else if(anciennete < 6){
+                  value = ((vCat + aug2000) * anciennete) / 100;
+                }
+                else if(anciennete < 31){
+                  value = ((vCat + aug2000) * (anciennete + 3)) / 100;
+                }
+                else {
+                  value = ((vCat + aug2000) * 33)/100;
+                }
+                f.base = (vCat + aug2000);
+                f.montant = round(value);
+              }
       else {
         f.montant = a.valeur_par_defaut;
       }
+      
       const {section,code,libelle} = a.rubrique;
       f.rubrique = {section: {nom:section.nom},code,libelle};
       if(a.rubrique.section.nom === SECTIONNAME.IMPOSABLE) {
         brut += f.montant;
       }
-      if(!((a.rubrique.code === 30) && (f.montant === 0))){
+      if(!(code === 30 && f.montant === 0)){
         bulletin.lignes['gains'].push(f);
       }
       
     });
-    return {brut,ipres};
+    return {brut,ipres,fnr};
   }
   async attributionFonctionnelle(nomActive: Nomination[],brut:number,bulletin:Bulletin,exclSpec: ExclusionSpecifique[]){
-    nomActive.forEach(async (n) =>{
+    await Promise.all(nomActive.map(async (n) =>{
         const attrFonc = await this.attributionFonctionnelleService.findByFonction(n.fonction._id.toString());
-        const gains = differenceBy(attrFonc,exclSpec,(v) => v.rubrique._id.toString()).filter(v => v.rubrique.section.nom != SECTIONNAME.RETENUE);
+        const gains = differenceBy(attrFonc,exclSpec,(v) => v.rubrique._id.toString()).filter(v => v.rubrique.section.nom !== SECTIONNAME.RETENUE);
         gains.forEach(g => {
           const f = new this.figModel();
           f.base = g.valeur_par_defaut;
           f.montant = g.valeur_par_defaut;
           const {section,code,libelle} = g.rubrique;
           f.rubrique = {section: {nom:section.nom},code,libelle};
+          
           if(g.rubrique.section.nom === SECTIONNAME.IMPOSABLE){
             brut += f.montant;
           }
           bulletin.lignes['gains'].push(f)
         })
-    })
+        return n;
+    }))
     return brut;
   }
 
   async attributionIndividuelle(emp: Employe,bulletin: Bulletin,brut: number,ipres: number,attrInd: AttributionIndividuelle[]){
-    const gains = attrInd.filter(a => a.rubrique.section.nom !== SECTIONNAME.RETENUE);
-    const f = new this.figModel();
+    const gains =  attrInd.filter(a => a.rubrique.section.nom !== SECTIONNAME.RETENUE);
+
     gains.forEach(g => {
+      const f = new this.figModel();
       // INDEMNITE D ENSEIGNEMENT
       if(g.rubrique.code === 145 ){
         f.base = emp.categorie.valeur;
@@ -340,12 +411,16 @@ export class LotController {
       }
       bulletin.lignes['gains'].push(f);
     })
-    
     return {brut,ipres};
   }
 
   getAnciennete(recrutement: string){
-    const rd = parse(recrutement,"yyyy-MM-dd",new Date());
+    let rd:any;
+    if(recrutement.includes('/')){
+      rd = parse(recrutement,"yyyy/MM/dd",new Date());
+    }else {
+      rd = parse(recrutement,"yyyy-MM-dd",new Date());
+    }
     const diff = intervalToDuration({start: rd,end: Date.now()}).years
     return diff;
   }
@@ -392,7 +467,16 @@ export class LotController {
 
   @Get('getbulletins/:id')
   async findBulletin(@Param('id') id: string) {
-    const files = await  glob(`uploads/bulletins/${id}-*.pdf`);
+    const lotValide = await this.lotService.findAllValide();
+    let files = [];
+    await Promise.all(lotValide.map(async (l:Lot) => {  
+      if(l.isPublished) {
+         const fils = await glob(`uploads/bulletins/${l._id.toString()}-${id}-*.pdf`);
+         files = [...files, ...fils];
+         return fils;
+      }
+    }))
+    
     return files;
   }
 
@@ -411,10 +495,14 @@ export class LotController {
     return this.lotService.update(id, updateLotDto);
   }
 
+  @CheckAbility({ action: Action.Delete, subject: Lot })
+  @UseGuards(AuthGuard('jwt'), CaslGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const lot = await this.lotService.remove(id);
     await this.registreService.removeByLot(id);
+    const files = await  glob(`uploads/bulletins/${id}-*.pdf`);
+    files.forEach(f => unlinkSync(`${f}`));
     return lot;
   }
 }

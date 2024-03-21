@@ -1,16 +1,15 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Type } from "class-transformer";
-import { format } from "date-fns";
 import { Document, Types } from "mongoose";
 import { Categorie } from "src/categorie/entities/categorie.entity";
 import { v4 as uuidv4 } from 'uuid';
+import { TypeEmploye } from "../dto/create-employe.dto";
 
 export type EmployeDocument = Employe & Document;
 
 @Schema({timestamps: true})
 export class Employe {
     
-
     _id:string;
 
     @Prop({type:String, required: true})
@@ -25,10 +24,10 @@ export class Employe {
     @Prop({type: String, default: '123456'})
     password: string;
 
-    @Prop({type:String, required: true})
+    @Prop({type:String})
     qualification: string;
 
-    @Prop({type:String, required: true,set:(v: string) => format(new Date(v),"yyyy-MM-dd")})
+    @Prop({type:String, required: true})
     date_de_recrutement: string;
 
     @Prop({type:String, required: true})
@@ -46,10 +45,10 @@ export class Employe {
     @Prop({type:String, required: true})
     nci: string;
 
-    @Prop({type:String, required: true})
+    @Prop({type:String})
     npp: string;
 
-    @Prop({type:String, required: true})
+    @Prop({type:String})
     matricule_de_solde: string;
 
     @Prop({type:String, required: true})
@@ -58,11 +57,17 @@ export class Employe {
     @Prop({type:String, required: true})
     civilite: string;
 
-    @Prop({type:Number, required: true})
+    @Prop({type:Number})
     nombre_de_parts: number;
 
-    @Prop({type:String, required: true,set:(v: string) => format(new Date(v),"yyyy-MM-dd")})
+    @Prop({type:Number})
+    mensualite: number;
+
+    @Prop({type:String, required: true})
     date_de_naissance: string;
+
+    @Prop({type:String})
+    date_de_fin_de_contrat: string;
 
     @Prop({type:String, required: true})
     lieu_de_naissance: string;
@@ -70,12 +75,16 @@ export class Employe {
     @Prop({type:String})
     profile: string;
 
-    @Prop({type:Types.ObjectId, required: true,ref: Categorie.name,autopopulate: true})
+    @Prop({type:Types.ObjectId,ref: Categorie.name,autopopulate: true})
     @Type(() => Categorie)
     categorie: Categorie;
 
     @Prop({type:Number, required: true, default: true})
     is_actif: number;
+
+
+    @Prop({type:String,enum:TypeEmploye,default:TypeEmploye.CDD, required: true})
+    type: string;
 }
 
 

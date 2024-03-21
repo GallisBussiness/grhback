@@ -32,7 +32,12 @@ export class EmployeController {
 
   @Get()
   findAll() {
-    return this.employeService.findAll();
+    return this.employeService.findAllCdi();
+  }
+
+  @Get("cdds")
+  findAllCdd() {
+    return this.employeService.findAllCdd();
   }
 
   @Get("bycode/:code")

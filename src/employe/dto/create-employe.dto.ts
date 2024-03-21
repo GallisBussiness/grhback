@@ -1,4 +1,9 @@
-import { IsMongoId, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsMongoId, IsNumber, IsOptional, IsString } from "class-validator";
+
+export enum TypeEmploye {
+    CDD = "CDD",
+    CDI = "CDI"
+}
 
 export class CreateEmployeDto {
     @IsString()
@@ -17,8 +22,13 @@ export class CreateEmployeDto {
     @IsString()
     nom: string;
 
+    @IsOptional()
     @IsString()
     qualification: string;
+
+    @IsOptional()
+    @IsString()
+    date_de_fin_de_contrat: string;
 
     @IsString()
     date_de_recrutement: string;
@@ -38,9 +48,11 @@ export class CreateEmployeDto {
     @IsString()
     nci: string;
 
+    @IsOptional()
     @IsString()
     npp: string;
 
+    @IsOptional()
     @IsString()
     matricule_de_solde: string;
 
@@ -50,12 +62,18 @@ export class CreateEmployeDto {
     @IsString()
     civilite: string;
 
+    @IsOptional()
     @IsNumber()
     nombre_de_parts: number;
+
+    @IsOptional()
+    @IsNumber()
+    mensualite: number;
 
     @IsString()
     date_de_naissance: string;
 
+    @IsOptional()
     @IsString()
     lieu_de_naissance: string;
 
@@ -63,6 +81,11 @@ export class CreateEmployeDto {
     @IsString()
     profile: string;
 
+    @IsOptional()
     @IsMongoId()
     categorie: string;
+
+    @IsEnum(TypeEmploye)
+    type: string;
+
 }

@@ -5,8 +5,9 @@ export type LotDocument = HydratedDocument<Lot>
 
 export enum StateLot {
     BROUILLON = 'BROUILLON',
-    WAITING = 'EN COURS DE VALIDATION',
-    VALIDE = 'VALIDE'
+    WAITING1 = 'SOUMIS',
+    WAITING2 = 'EN COURS DE VALIDATION',
+    VALIDE = 'VALIDE',
 }
 
 @Schema({timestamps: true})
@@ -30,6 +31,9 @@ export class Lot {
 
     @Prop({type: String,required: true,enum:StateLot,default:StateLot.BROUILLON})
     etat: StateLot;
+
+    @Prop({type:Boolean, default: false,required: true})
+    isPublished:boolean;
 }
 
 export const LotSchema = SchemaFactory.createForClass(Lot);

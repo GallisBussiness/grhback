@@ -10,7 +10,7 @@ import { Bulletin, bulletinSchema } from './entities/bulletin.entity';
     schema.plugin(require('mongoose-autopopulate'));
     return schema;
   }}])],
-  controllers: [BulletinController],
+  // controllers: [BulletinController],
   providers: [BulletinService],
 })
 export class BulletinModule {}

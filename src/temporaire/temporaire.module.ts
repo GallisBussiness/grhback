@@ -5,8 +5,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Temporaire, TemporaireSchema } from './entities/temporaire.entity';
 
 @Module({
-  imports:[MongooseModule.forFeature([{name:Temporaire.name,schema: TemporaireSchema}])],
+  imports:[MongooseModule.forFeatureAsync([{name:Temporaire.name,useFactory: () => {
+    const schema = TemporaireSchema;
+    schema.plugin(require('mongoose-autopopulate'));
+    return schema;
+  }}])],
   controllers: [TemporaireController],
   providers: [TemporaireService],
+  exports:[TemporaireService],
 })
 export class TemporaireModule {}

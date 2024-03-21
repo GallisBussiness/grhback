@@ -1,4 +1,4 @@
-import { Injectable,HttpException } from '@nestjs/common';
+import { Injectable,HttpException, Logger } from '@nestjs/common';
 import { CreateFichepresenceDto } from './dto/create-fichepresence.dto';
 import { UpdateFichepresenceDto } from './dto/update-fichepresence.dto';
 import { AbstractModel } from 'src/utils/abstractmodel';
@@ -7,13 +7,41 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MonthDto } from './dto/month.dto';
 import { Presence } from 'src/presence/entities/presence.entity';
-import { compareAsc, parseISO } from 'date-fns';
+import { addDays, compareAsc, format, parse, parseISO } from 'date-fns';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class FichepresenceService extends AbstractModel<Fichepresence,CreateFichepresenceDto,UpdateFichepresenceDto>{
+  private readonly logger = new Logger(FichepresenceService.name);
  constructor(@InjectModel(Fichepresence.name) private readonly ficheModel: Model<FichepresenceDocument>){
   super(ficheModel);
  }
+
+ async findLast():Promise<Fichepresence[]> {
+  try {
+    return await this.ficheModel.find().sort({ createdAt : -1}).limit(30);
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
+ async findLastFiche():Promise<Fichepresence[]> {
+  try {
+    return await this.ficheModel.find().sort({ createdAt : -1}).limit(1);
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+ 
+
+ async findWeek(start: string,end: string,mois: string):Promise<Fichepresence[]> {
+  try {
+    return await this.ficheModel.find({ date: { $gte: start, $lte: end },mois });
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
  async findOpened():Promise<Fichepresence[]> {
   try {
    return this.ficheModel.find({isOpen: true})
@@ -67,6 +95,8 @@ export class FichepresenceService extends AbstractModel<Fichepresence,CreateFich
   }
  }
 
+ 
+
  async getByMonth(monthDto: MonthDto):Promise<any> {
   try {
    return this.ficheModel.aggregate([{
@@ -110,14 +140,13 @@ export class FichepresenceService extends AbstractModel<Fichepresence,CreateFich
  }
  async getByMonthAndEmploye(monthDto: MonthDto & {employe: string}):Promise<Presence[]> {
   try {
-   const fiches = (await this.getByMonth({annee:monthDto.annee,mois: monthDto.mois}));
+   const fiches = await this.getByMonth({annee:monthDto.annee,mois: monthDto.mois});
    if(fiches && fiches.length !== 0){
     let presences = [];
     fiches.forEach(f => {
       const p = f['presences'].filter(p => p.employe._id.toString() === monthDto.employe);
       presences = [...presences,...p];
     });
-    
     return presences.sort((a,b) => compareAsc(parseISO(a.heure),parseISO(b.heure))).reverse();
    }else{
     return [];
@@ -175,4 +204,16 @@ export class FichepresenceService extends AbstractModel<Fichepresence,CreateFich
     throw new HttpException(error.message, 500)
   }
  }
+
+ @Cron('0 30 4 * * 1-5')
+  async handleCron() {
+    const fiche = await this.findLastFiche();
+    const f = fiche[0];
+    const nextd = addDays(parse(f.date,'dd/MM/yyyy',new Date()),1);
+    const formatnextd = format(nextd, 'dd/MM/yyyy');
+    const [,mois,annee] = formatnextd.split('/');
+    const newf = {date:formatnextd,mois,annee,description:'FICHE  DE PRESENCE DU ' + formatnextd};
+    await this.update(f._id.toString(),{isOpen:false});
+    const newFiche = await this.create(newf);
+  }
 }

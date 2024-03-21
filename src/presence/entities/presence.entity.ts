@@ -8,6 +8,8 @@ export type PresenceDocument = Presence & Document;
 
 @Schema({timestamps: true})
 export class Presence {
+    _id: string;
+    
     @Prop({type: String, enum: TYPEPRESENCE, required: true})
     type: string;
 
@@ -15,7 +17,7 @@ export class Presence {
      heure: string;
 
      @Prop({type: Types.ObjectId, ref: Employe.name, required: true, autopopulate: true})
-     employe: string;
+     employe: Employe;
 
      @Prop({type: Types.ObjectId, ref: Fichepresence.name, required: true,autopopulate: true})
      fiche: string;

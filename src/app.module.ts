@@ -26,8 +26,15 @@ import { LotModule } from './lot/lot.module';
 import { BulletinModule } from './bulletin/bulletin.module';
 import { RegistreModule } from './registre/registre.module';
 import { TemporaireModule } from './temporaire/temporaire.module';
-import { FonctiontempModule } from './fonctiontemp/fonctiontemp.module';
 import { DocModule } from './doc/doc.module';
+import { LotscddModule } from './lotscdd/lotscdd.module';
+import { BulletinscddModule } from './bulletinscdd/bulletinscdd.module';
+import { RegistrecddModule } from './registrecdd/registrecdd.module';
+import { StatusModule } from './status/status.module';
+import { LotstempModule } from './lotstemp/lotstemp.module';
+import { RegistretempModule } from './registretemp/registretemp.module';
+import { CommentaireModule } from './commentaire/commentaire.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -51,6 +58,7 @@ import { DocModule } from './doc/doc.module';
       },
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     EmployeModule, PresenceModule, FichepresenceModule,UserModule,
      SessionModule, RubriqueModule, SectionModule, 
      CategorieModule, DivisionModule, ServiceModule, 
@@ -60,8 +68,14 @@ import { DocModule } from './doc/doc.module';
        ExclusionSpecifiqueModule, LotModule, BulletinModule, RegistreModule,
        CategorieModule,
        TemporaireModule,
-       FonctiontempModule,
-       DocModule
+       DocModule,
+       LotscddModule,
+       BulletinscddModule,
+       RegistrecddModule,
+       StatusModule,
+       LotstempModule,
+       RegistretempModule,
+       CommentaireModule,
       ],
   providers: [AppService],
 })
@@ -69,7 +83,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude({ path: 'user/login', method: RequestMethod.POST })
+      .exclude('user/login')
       .forRoutes('*');
   }
 }

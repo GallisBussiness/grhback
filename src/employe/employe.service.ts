@@ -1,5 +1,5 @@
 import { Injectable,HttpException, UnauthorizedException } from '@nestjs/common';
-import { CreateEmployeDto } from './dto/create-employe.dto';
+import { CreateEmployeDto, TypeEmploye } from './dto/create-employe.dto';
 import { UpdateEmployeDto } from './dto/update-employe.dto';
 import { AbstractModel } from 'src/utils/abstractmodel';
 import { Employe, EmployeDocument } from './entities/employe.entity';
@@ -20,6 +20,22 @@ export class EmployeService extends AbstractModel<Employe,CreateEmployeDto,Updat
   }
  }
 
+ async findAllCdi():Promise<Employe[]> {
+  try {
+    return await this.employeModel.find({type: TypeEmploye.CDI})
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
+ async findAllCdd():Promise<Employe[]> {
+  try {
+    return await this.employeModel.find({type: TypeEmploye.CDD})
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
  async updatePassword(id: string,dto: {oldPass: string,newPass: string}):Promise<Boolean> {
   try {
     const user = await this.findOne(id);
@@ -34,7 +50,15 @@ export class EmployeService extends AbstractModel<Employe,CreateEmployeDto,Updat
 
  async findActive():Promise<Employe[]> {
   try {
-    return await this.employeModel.find({is_actif: true})
+    return await this.employeModel.find({is_actif: true,type: TypeEmploye.CDI})
+  } catch (error) {
+    throw new HttpException(error.message, 500)
+  }
+ }
+
+ async findActiveCdd():Promise<Employe[]> {
+  try {
+    return await this.employeModel.find({is_actif: true,type:TypeEmploye.CDD})
   } catch (error) {
     throw new HttpException(error.message, 500)
   }
