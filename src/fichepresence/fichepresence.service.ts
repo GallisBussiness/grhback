@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MonthDto } from './dto/month.dto';
 import { Presence } from 'src/presence/entities/presence.entity';
-import { addDays, compareAsc, format, parse, parseISO } from 'date-fns';
+import { addDays, compareAsc, format, isWeekend, parse, parseISO } from 'date-fns';
 import { Cron } from '@nestjs/schedule';
 
 @Injectable()
@@ -209,7 +209,7 @@ export class FichepresenceService extends AbstractModel<Fichepresence,CreateFich
   async handleCron() {
     const fiche = await this.findLastFiche();
     const f = fiche[0];
-    const nextd = addDays(parse(f.date,'dd/MM/yyyy',new Date()),1);
+    const nextd = isWeekend(addDays(parse(f.date,'dd/MM/yyyy',new Date()),1)) ? addDays(parse(f.date,'dd/MM/yyyy',new Date()),3) : addDays(parse(f.date,'dd/MM/yyyy',new Date()),1);
     const formatnextd = format(nextd, 'dd/MM/yyyy');
     const [,mois,annee] = formatnextd.split('/');
     const newf = {date:formatnextd,mois,annee,description:'FICHE  DE PRESENCE DU ' + formatnextd};

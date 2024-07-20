@@ -6,7 +6,7 @@ import { Rubrique } from "src/rubrique/entities/rubrique.entity";
 
 @Schema({timestamps: true})
 export class AttributionIndividuelle {
-    @Prop({type: Types.ObjectId,ref: Employe.name,required: true})
+    @Prop({type: Types.ObjectId,ref: Employe.name,required: true,autopopulate:true})
     employe: string;
 
     @Prop({type: Types.ObjectId,ref: Rubrique.name,required: true,autopopulate: {maxDepth: 2}})

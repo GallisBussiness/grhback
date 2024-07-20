@@ -22,6 +22,11 @@ export class AttributionIndividuelleController {
     return this.attributionIndividuelleService.findByEmploye(emp);
   }
 
+  @Get('byrubrique/:ru')
+  findOneByRubrique(@Param('ru') ru: string) {
+    return this.attributionIndividuelleService.findByRubrique(ru);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.attributionIndividuelleService.findOne(id);

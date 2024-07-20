@@ -22,6 +22,11 @@ export class ExclusionSpecifiqueController {
     return this.exclusionSpecifiqueService.findByEmploye(emp);
   }
 
+  @Get('byrubrique/:ru')
+  findOneByRubrique(@Param('ru') ru: string) {
+    return this.exclusionSpecifiqueService.findByRubrique(ru);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.exclusionSpecifiqueService.findOne(id);

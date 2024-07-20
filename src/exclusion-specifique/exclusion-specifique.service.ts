@@ -19,4 +19,12 @@ export class ExclusionSpecifiqueService extends AbstractModel<ExclusionSpecifiqu
       throw new HttpException(error.message,500)
     }
   }
+
+  async findByRubrique(ru: string):Promise<ExclusionSpecifique[]> {
+    try {
+      return this.exclusionSpecifiqueModel.find({rubrique:ru});
+    } catch (error) {
+      throw new HttpException(error.message,500)
+    }
+  }
 }

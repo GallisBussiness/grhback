@@ -10,7 +10,7 @@ export class ExclusionSpecifique {
 
     _id: string;
 
-    @Prop({type: Types.ObjectId,ref: Employe.name,required: true})
+    @Prop({type: Types.ObjectId,ref: Employe.name,required: true,autopopulate: true})
     employe: string;
 
     @Prop({type: Types.ObjectId,ref: Rubrique.name,required: true,autopopulate: true})

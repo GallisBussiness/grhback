@@ -52,17 +52,15 @@ export class LotController {
   @Post('generatebulletin/:id')
   async generateBulletin(@Param('id') id: string) {
     const pdf = new PdfMaker();
-    const lot = await this.lotService.findOne(id);
-    const employes = await this.employeService.findActive();
-    const attG = await this.attributionGlobaleService.findAll();
-    const bulletins: Bulletin[] =[];
+    const [lot,employes,attG] = await Promise.all([this.lotService.findOne(id),this.employeService.findActive(),this.attributionGlobaleService.findAll()])
+    const bulletins: Bulletin[]=[];
     for (let emp of employes){
-       let bulletin:Bulletin = {employe: emp,lignes:{gains:[],retenues:[]},lot};
-       let brut = 0;
+       let bulletin:Bulletin = {employe: emp,lignes:{gains:[],retenues:[]},lot};   let brut = 0;
        let ipres = 0;
        let fnr = 0;
+       
        const {brut:b,ipres:i,fnr:f} = await this.determinationGains(emp,bulletin,brut,fnr,ipres,attG);
-       await this.determinationRetenues(emp,bulletin,b,i,f,attG);
+       await this.determinationRetenues(emp,bulletin,b,i,f,attG); 
        bulletins.push(bulletin);
   }
   let curR = await this.registreService.findByAnneeAndMois(lot.annee,lot.mois);

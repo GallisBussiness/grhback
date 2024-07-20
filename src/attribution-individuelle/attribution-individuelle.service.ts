@@ -20,4 +20,12 @@ export class AttributionIndividuelleService extends AbstractModel<AttributionInd
       throw new HttpException(error.message,500)
     }
   }
+
+  async findByRubrique(ru: string):Promise<AttributionIndividuelle[]> {
+    try {
+      return this.attributionIndividuelleModel.find({rubrique:ru});
+    } catch (error) {
+      throw new HttpException(error.message,500)
+    }
+  }
 }
